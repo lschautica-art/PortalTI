@@ -269,13 +269,12 @@
       return;
     }
 
-    if(data.session){
-      mostrarSucesso("Conta criada com sucesso! Redirecionando...");
-      setTimeout(() => {
-        window.location.href = 'portal.html';
-      }, 1200);
-      return;
-    }
+ mostrarSucesso("Conta criada com sucesso! Agora faça login.");
+setBotaoCarregando(false);
+
+setTimeout(() => {
+  window.location.href = 'index.html';
+}, 1500);
 
     mostrarSucesso("Conta criada com sucesso! Agora faça login.");
     setBotaoCarregando(false);
