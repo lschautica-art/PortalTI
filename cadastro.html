@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cadastro - Dashboard TI</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body, html { min-height:100%; background:linear-gradient(135deg,#073954,#0b2e47); display:flex; justify-content:center; align-items:center; padding:24px; animation:bgMove 10s infinite alternate ease-in-out; }
+  @keyframes bgMove { 0% {background-position:0% 50%;} 100% {background-position:100% 50%;} }
+  .cadastro-container { background:#fff; color:#073954; padding:40px 50px; border-radius:15px; box-shadow:0 12px 35px rgba(7,57,84,0.4); width:100%; max-width:420px; text-align:center; animation:fadeIn 0.8s ease; position:relative; }
+  @keyframes fadeIn { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
+  .cadastro-container h2 { margin-bottom:12px; font-weight:700; font-size:2rem; }
+  .cadastro-container p { color:#5b6d7a; margin-bottom:24px; line-height:1.5; }
+  .input-group { margin-bottom:18px; position:relative; text-align:left; }
+  .input-group i { position:absolute; top:50%; left:12px; transform:translateY(-50%); color:#888; font-size:1.1rem; }
+  input { width:100%; padding:12px 15px 12px 40px; border-radius:8px; border:2px solid #ddd; font-size:1rem; transition:0.3s; }
+  input:focus { border-color:#fb3f3a; outline:none; box-shadow:0 0 8px rgba(251,63,58,0.5); }
+  input.error { border-color:#ff4f4f; box-shadow:0 0 6px rgba(255,79,79,0.6); }
+  button, .btn-voltar { display:block; width:100%; border:none; text-decoration:none; color:white; font-size:1.05rem; font-weight:700; padding:14px 0; border-radius:10px; transition:0.3s ease; margin-top:6px; }
+  button { background:linear-gradient(45deg,#fb3f3a,#d73731); cursor:pointer; box-shadow:0 6px 18px rgba(251,63,58,0.5); }
+  button:hover:not(:disabled) { background:linear-gradient(45deg,#d73731,#fb3f3a); transform:translateY(-2px); box-shadow:0 8px 22px rgba(215,55,49,0.7); }
+  button:disabled { background:gray; cursor:not-allowed; box-shadow:none; }
+  .btn-voltar { background:linear-gradient(45deg,#073954,#0b2e47); box-shadow:0 6px 18px rgba(7,57,84,0.35); margin-top:10px; }
+  .btn-voltar:hover { background:linear-gradient(45deg,#0b2e47,#073954); transform:translateY(-2px); box-shadow:0 8px 22px rgba(7,57,84,0.5); }
+  .msg { position:absolute; top:-35px; left:50%; transform:translateX(-50%); padding:10px 18px; border-radius:6px; font-weight:600; font-size:0.9rem; display:none; color:white; box-shadow:0 3px 10px rgba(0,0,0,0.3); max-width:90%; }
+  .error-msg { background:#ff4f4f; }
+  .success-msg { background:#28a745; }
+  .logo { display:block; margin:0 auto 25px auto; max-width:180px; height:auto; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+  @media(max-width:480px){ .cadastro-container{padding:32px 20px;} .cadastro-container h2{font-size:1.7rem;} }
+</style>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="cadastro-container">
+    <div class="msg error-msg" id="errorMsg"></div>
+    <div class="msg success-msg" id="successMsg"></div>
+    <img src="logo.png" alt="Logo da Empresa" class="logo" />
+    <h2>Criar conta</h2>
+    <p>Preencha seus dados para acessar o portal.</p>
+
+    <div class="input-group">
+      <i class="fas fa-id-badge"></i>
+      <input type="text" id="nome" placeholder="Digite seu nome" autocomplete="name" />
+    </div>
+
+    <div class="input-group">
+      <i class="fas fa-envelope"></i>
+      <input type="email" id="email" placeholder="Digite seu e-mail" autocomplete="email" />
+    </div>
+
+    <div class="input-group">
+      <i class="fas fa-lock"></i>
+      <input type="password" id="senha" placeholder="Crie uma senha" autocomplete="new-password" />
+    </div>
+
+    <div class="input-group">
+      <i class="fas fa-check-circle"></i>
+      <input type="password" id="confirmarSenha" placeholder="Confirme sua senha" autocomplete="new-password" />
+    </div>
+
+    <button onclick="criarConta()" id="btnCadastro">Cadastrar</button>
+    <a href="index.html" class="btn-voltar">Voltar para o login</a>
+  </div>
+
+<script>
+  const supabase = window.supabase.createClient(
+    "https://nfbcjunuanwjsciajifg.supabase.co",
+    "sb_publishable_fFiZCvpwkFgcOLob6SVQ7Q_6yJqiDqz"
+  );
+
+  const errorMsg = document.getElementById('errorMsg');
+  const successMsg = document.getElementById('successMsg');
+  const btnCadastro = document.getElementById('btnCadastro');
+  const inputNome = document.getElementById('nome');
+  const inputEmail = document.getElementById('email');
+  const inputSenha = document.getElementById('senha');
+  const inputConfirmarSenha = document.getElementById('confirmarSenha');
+
+  function mostrarErro(msg){
+    errorMsg.textContent = msg;
+    errorMsg.style.display = 'block';
+    successMsg.style.display = 'none';
+  }
+
+  function mostrarSucesso(msg){
+    successMsg.textContent = msg;
+    successMsg.style.display = 'block';
+    errorMsg.style.display = 'none';
+  }
+
+  function limparMensagens(){
+    errorMsg.style.display = 'none';
+    successMsg.style.display = 'none';
+    inputNome.classList.remove('error');
+    inputEmail.classList.remove('error');
+    inputSenha.classList.remove('error');
+    inputConfirmarSenha.classList.remove('error');
+  }
+
+  function marcarErro(...campos){
+    campos.forEach(campo => campo.classList.add('error'));
+  }
+
+  function setBotaoCarregando(carregando, texto = "Cadastrar"){
+    btnCadastro.disabled = carregando;
+    btnCadastro.textContent = texto;
+  }
+
+  function getMensagemErroAuth(error){
+    if(!error || !error.message){
+      return "Nao foi possivel concluir o cadastro.";
+    }
+
+    const mensagem = error.message.toLowerCase();
+
+    if(mensagem.includes("user already registered")){
+      return "Este e-mail ja esta cadastrado. Tente fazer login.";
+    }
+
+    if(mensagem.includes("password should be at least")){
+      return "A senha deve ter pelo menos 6 caracteres.";
+    }
+
+    if(mensagem.includes("unable to validate email address") || mensagem.includes("email address")){
+      return "Digite um e-mail valido.";
+    }
+
+    return error.message;
+  }
+
+  async function redirecionarSeSessaoAtiva(){
+    const { data } = await supabase.auth.getSession();
+
+    if(data.session){
+      window.location.href = 'portal.html';
+      return true;
+    }
+
+    return false;
+  }
+
+  async function criarConta(){
+    limparMensagens();
+
+    const nome = inputNome.value.trim();
+    const email = inputEmail.value.trim();
+    const senha = inputSenha.value.trim();
+    const confirmarSenha = inputConfirmarSenha.value.trim();
+
+    if(!nome || !email || !senha || !confirmarSenha){
+      mostrarErro("Preencha todos os campos para continuar.");
+      if(!nome) marcarErro(inputNome);
+      if(!email) marcarErro(inputEmail);
+      if(!senha) marcarErro(inputSenha);
+      if(!confirmarSenha) marcarErro(inputConfirmarSenha);
+      return;
+    }
+
+    if(senha.length < 6){
+      mostrarErro("A senha deve ter pelo menos 6 caracteres.");
+      marcarErro(inputSenha);
+      return;
+    }
+
+    if(senha !== confirmarSenha){
+      mostrarErro("As senhas nao coincidem.");
+      marcarErro(inputSenha, inputConfirmarSenha);
+      return;
+    }
+
+    setBotaoCarregando(true, "Cadastrando...");
+
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: senha,
+      options: {
+        data: {
+          nome: nome
+        },
+        emailRedirectTo: `${window.location.origin}${window.location.pathname.replace(/cadastro\.html$/i, "portal.html")}`
+      }
+    });
+
+    if(error){
+      mostrarErro(getMensagemErroAuth(error));
+      setBotaoCarregando(false);
+      return;
+    }
+
+    const jaExistia = Array.isArray(data?.user?.identities) && data.user.identities.length === 0;
+
+    if(jaExistia){
+      mostrarErro("Este e-mail ja esta cadastrado. Tente fazer login.");
+      setBotaoCarregando(false);
+      return;
+    }
+
+    if(data.session){
+      mostrarSucesso("Conta criada com sucesso! Redirecionando...");
+      setTimeout(() => {
+        window.location.href = 'portal.html';
+      }, 1200);
+      return;
+    }
+
+    const loginAutomatico = await supabase.auth.signInWithPassword({
+      email: email,
+      password: senha
+    });
+
+    if(!loginAutomatico.error && (loginAutomatico.data?.session || loginAutomatico.data?.user)){
+      mostrarSucesso("Conta criada com sucesso! Redirecionando...");
+      setTimeout(() => {
+        window.location.href = 'portal.html';
+      }, 1200);
+      return;
+    }
+
+    const houveSessao = await redirecionarSeSessaoAtiva();
+
+    if(houveSessao){
+      return;
+    }
+
+    mostrarSucesso("Conta criada. Verifique seu e-mail para confirmar o cadastro antes de entrar.");
+    setBotaoCarregando(false);
+  }
+
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){
+      criarConta();
+    }
+  });
+
+  redirecionarSeSessaoAtiva();
+</script>
+</body>
+</html>

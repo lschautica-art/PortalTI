@@ -20,11 +20,23 @@
   button:hover:not(:disabled) { background:linear-gradient(45deg,#d73731,#fb3f3a); transform:translateY(-2px); box-shadow:0 8px 22px rgba(215,55,49,0.7); }
   button:disabled { background:gray; cursor:not-allowed; box-shadow:none; }
   .btn-secundario {
+    display:block;
+    width:100%;
+    text-align:center;
+    text-decoration:none;
     background:linear-gradient(45deg,#073954,#0b2e47);
+    color:white;
+    font-size:1.1rem;
+    font-weight:700;
+    padding:14px 0;
+    border-radius:10px;
     box-shadow:0 6px 18px rgba(7,57,84,0.35);
+    transition:0.3s ease;
+    margin-top:10px;
   }
-  .btn-secundario:hover:not(:disabled) {
+  .btn-secundario:hover {
     background:linear-gradient(45deg,#0b2e47,#073954);
+    transform:translateY(-2px);
     box-shadow:0 8px 22px rgba(7,57,84,0.5);
   }
   .msg { position:absolute; top:-35px; left:50%; transform:translateX(-50%); padding:10px 18px; border-radius:6px; font-weight:600; font-size:0.9rem; display:none; color:white; box-shadow:0 3px 10px rgba(0,0,0,0.3); }
@@ -54,7 +66,7 @@
     </div>
 
     <button onclick="fazerLogin()" id="btnLogin">Entrar</button>
-    <button onclick="criarConta()" id="btnCadastro" class="btn-secundario">Criar conta</button>
+    <a href="cadastro.html" id="btnCadastro" class="btn-secundario">Criar conta</a>
   </div>
 
 <script>
@@ -66,7 +78,6 @@
   const errorMsg = document.getElementById('errorMsg');
   const successMsg = document.getElementById('successMsg');
   const btnLogin = document.getElementById('btnLogin');
-  const btnCadastro = document.getElementById('btnCadastro');
   const inputUsuario = document.getElementById('usuario');
   const inputSenha = document.getElementById('senha');
 
@@ -89,11 +100,9 @@
     inputSenha.classList.remove('error');
   }
 
-  function setBotoesCarregando(carregando, textoLogin = "Entrar", textoCadastro = "Criar conta"){
+  function setBotoesCarregando(carregando, textoLogin = "Entrar"){
     btnLogin.disabled = carregando;
-    btnCadastro.disabled = carregando;
     btnLogin.textContent = textoLogin;
-    btnCadastro.textContent = textoCadastro;
   }
 
   function getMensagemErroAuth(error){
@@ -146,7 +155,7 @@
       return;
     }
 
-    setBotoesCarregando(true, "Entrando...", "Criar conta");
+    setBotoesCarregando(true, "Entrando...");
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
@@ -172,45 +181,6 @@
     }
   }
 
-  async function criarConta(){
-  limparMensagens();
-
-  const email = inputUsuario.value.trim();
-  const senha = inputSenha.value.trim();
-
-  if(!email || !senha){
-    mostrarErro("Preencha e-mail e senha para criar a conta.");
-    return;
-  }
-
-  if(senha.length < 6){
-    mostrarErro("A senha deve ter pelo menos 6 caracteres.");
-    return;
-  }
-
-  setBotoesCarregando(true, "Entrar", "Criando...");
-
-  try {
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: senha
-    });
-
-    if(error){
-      mostrarErro(getMensagemErroAuth(error));
-      setBotoesCarregando(false);
-      return;
-    }
-
-    mostrarSucesso("Conta criada com sucesso!");
-    setBotoesCarregando(false);
-
-  } catch (erro) {
-    mostrarErro("Erro inesperado ao criar a conta.");
-    setBotoesCarregando(false);
-  }
-}
-  
   async function verificarSessao(){
     await redirecionarSeSessaoAtiva();
   }
