@@ -81,6 +81,32 @@
   @media (max-width: 980px) { body { display: block; } #sidebar { position: relative; width: 100%; height: auto; } #mainContent { width: 100%; margin-left: 0; padding: 18px; } .topbar, .section-header { display: block; } .topbar-tag { display: inline-block; margin-top: 14px; } }
   @media (max-width: 640px) { .metrics, .highlights { grid-template-columns: 1fr; } .brand { align-items: flex-start; flex-direction: column; } .hero-inner { padding: 24px 18px; } .area-visual { min-height: 220px; padding: 22px 18px; } }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabase = window.supabase.createClient(
+  "https://nfbcjunuanwjsciajifg.supabase.co",
+  "sb_publishable_fFiZCvpwkFgcOLob6SVQ7Q_6yJqiDqz"
+);
+
+// 🔐 Verifica se está logado
+async function verificarLogin() {
+  const { data } = await supabase.auth.getSession();
+
+  if (!data.session) {
+    window.location.href = "index.html";
+  }
+}
+
+// 🚪 Logout
+async function logout() {
+  await supabase.auth.signOut();
+  window.location.href = "index.html";
+}
+
+// Executa ao carregar
+verificarLogin();
+</script>
 </head>
 <body>
   <aside id="sidebar">
@@ -95,7 +121,7 @@
       <li class="menu-label"><span>Area RH</span></li>
       <li><a href="portal-rh.html">RH</a></li>
       <li><a href="Controle de gasolina.html">Controle de gasolina</a></li>
-      <li><a href="index.html">Sair</a></li>
+      <li><a href="#" onclick="logout()">Sair</a></li>
     </ul>
   </aside>
 
