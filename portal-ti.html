@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal TI</title>
+<style>
+  :root {
+    --bg: #f4f7fb;
+    --surface: #ffffff;
+    --primary: #073954;
+    --secondary: #fb3f3a;
+    --text: #203140;
+    --muted: #667788;
+    --border: rgba(7, 57, 84, 0.1);
+    --shadow: 0 18px 38px rgba(7, 57, 84, 0.1);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(180deg, #f6f9fc 0%, #eef3f8 100%); color: var(--text); display: flex; min-height: 100vh; }
+  #sidebar { width: 240px; background: linear-gradient(180deg, #073954 0%, #0b2e47 100%); color: white; height: 100vh; position: fixed; top: 0; left: 0; padding: 24px 18px; box-sizing: border-box; overflow-y: auto; box-shadow: inset -1px 0 0 rgba(255,255,255,0.08); }
+  .sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 6px 8px 18px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+  .sidebar-brand img { width: 62px; height: auto; object-fit: contain; }
+  .sidebar-brand-text strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+  .sidebar-brand-text span { display: block; font-size: 0.82rem; line-height: 1.35; color: rgba(255,255,255,0.74); }
+  #sidebar h2 { text-align: left; margin-bottom: 14px; padding: 0 8px; font-size: 1rem; }
+  #sidebar ul { list-style: none; padding: 0; margin: 0; }
+  #sidebar ul li { margin: 10px 0; }
+  #sidebar ul li a, #sidebar ul li span { color: white; text-decoration: none; display: block; padding: 10px 12px; border-radius: 12px; font-weight: bold; transition: background 0.2s, transform 0.2s; }
+  #sidebar ul li a:hover, #sidebar ul li a.active { background: rgba(251,63,58,0.95); transform: translateX(2px); }
+  #sidebar .menu-label span { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.86); font-size: 0.82rem; letter-spacing: 0.04em; text-transform: uppercase; }
+  #mainContent { margin-left: 240px; padding: 24px; width: calc(100% - 240px); }
+  .topbar, .hero, .summary-card, .module-card, .roadmap { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .topbar { border-radius: 22px; padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 24px; }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand img { width: 82px; height: auto; }
+  .brand strong { display: block; color: var(--primary); font-size: 1.15rem; margin-bottom: 4px; }
+  .brand span { color: var(--muted); font-size: 0.94rem; }
+  .tag { background: #eef5f9; color: var(--primary); border-radius: 999px; padding: 10px 16px; font-weight: 700; }
+  .hero { background: linear-gradient(135deg, #073954, #0c5b80); color: white; border-radius: 26px; padding: 34px; margin-bottom: 24px; overflow: hidden; position: relative; }
+  .hero::after { content: ""; position: absolute; width: 320px; height: 320px; border-radius: 50%; background: rgba(255,255,255,0.08); top: -90px; right: -60px; }
+  .hero > * { position: relative; }
+  .hero h1 { margin: 0 0 12px; font-size: clamp(2.1rem, 4vw, 3.4rem); }
+  .hero p { margin: 0; color: rgba(255,255,255,0.88); max-width: 860px; line-height: 1.7; }
+  .summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-bottom: 24px; }
+  .summary-card { border-radius: 20px; padding: 20px; }
+  .summary-card span { display: block; color: var(--muted); margin-bottom: 8px; }
+  .summary-card strong { display: block; color: var(--primary); font-size: 1.8rem; }
+  .section-title { margin: 0 0 16px; color: var(--primary); font-size: 1.6rem; }
+  .modules-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-bottom: 24px; }
+  .module-card { border-radius: 22px; padding: 24px; }
+  .module-card h3 { margin: 0 0 10px; color: var(--primary); font-size: 1.35rem; }
+  .module-card p { margin: 0 0 18px; color: var(--muted); line-height: 1.6; min-height: 94px; }
+  .module-card a { display: inline-block; text-decoration: none; background: var(--secondary); color: white; padding: 10px 16px; border-radius: 999px; font-weight: 700; }
+  .roadmap { border-radius: 22px; padding: 24px; }
+  .roadmap strong { display: block; color: var(--primary); margin-bottom: 8px; font-size: 1.1rem; }
+  .roadmap p { margin: 0; color: var(--muted); line-height: 1.7; }
+  @media (max-width: 1100px) { .summary-grid, .modules-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 980px) { body { display: block; } #sidebar { position: relative; width: 100%; height: auto; } #mainContent { width: 100%; margin-left: 0; } .topbar { display: block; } .tag { display: inline-block; margin-top: 14px; } }
+</style>
+</head>
+<body>
+  <aside id="sidebar">
+    <div class="sidebar-brand">
+      <img src="logo.png" alt="Logo DC">
+      <div class="sidebar-brand-text">
+        <strong>Portal DC</strong>
+        <span>Controles internos e dashboards corporativos.</span>
+      </div>
+    </div>
+    <h2>Menu</h2>
+    <ul>
+      <li><a href="portal.html">Portal Inicial</a></li>
+      <li class="menu-label"><span>Area TI</span></li>
+      <li><a href="portal-ti.html" class="active">Tecnologia da Informacao</a></li>
+      <li><a href="dashboard.html">Dashboard TI</a></li>
+      <li><a href="dashboard-2026.html">Dashboard TI - 2026</a></li>
+      <li><a href="comparativo-anual-2025.html">Comparativo Anual</a></li>
+      <li class="menu-label"><span>Area RH</span></li>
+      <li><a href="portal-rh.html">RH</a></li>
+      <li><a href="Controle de gasolina.html">Controle de combustivel</a></li>
+      <li><a href="index.html">Sair</a></li>
+    </ul>
+  </aside>
+
+  <main id="mainContent">
+    <section class="topbar">
+      <div class="brand">
+        <img src="logo.png" alt="Logo DC">
+        <div>
+          <strong>Portal TI</strong>
+          <span>Area central para os paineis financeiros e comparativos de tecnologia.</span>
+        </div>
+      </div>
+      <div class="tag">Tecnologia da Informacao</div>
+    </section>
+
+    <section class="hero">
+      <h1>Gestao visual dos gastos de TI em um unico lugar</h1>
+      <p>Esta area concentra os dashboards de tecnologia em uma apresentacao mais institucional e organizada, deixando a navegacao mais clara para acompanhamento mensal, leitura anual e comparacao entre periodos.</p>
+    </section>
+
+    <section class="summary-grid">
+      <article class="summary-card"><span>Modulos ativos</span><strong>3</strong></article>
+      <article class="summary-card"><span>Escopo</span><strong>TI</strong></article>
+      <article class="summary-card"><span>Base atual</span><strong>2024-2026</strong></article>
+      <article class="summary-card"><span>Foco</span><strong>Gastos</strong></article>
+    </section>
+
+    <h2 class="section-title">Modulos Disponiveis</h2>
+    <section class="modules-grid">
+      <article class="module-card">
+        <h3>Dashboard TI</h3>
+        <p>Painel principal com visao consolidada dos gastos de tecnologia, ideal para leitura executiva e acompanhamento continuo.</p>
+        <a href="dashboard.html">Abrir dashboard</a>
+      </article>
+      <article class="module-card">
+        <h3>Dashboard TI - 2026</h3>
+        <p>Visao dedicada ao ano de 2026, com foco em leitura mensal e acompanhamento direto da base mais recente.</p>
+        <a href="dashboard-2026.html">Abrir dashboard 2026</a>
+      </article>
+      <article class="module-card">
+        <h3>Comparativo Anual</h3>
+        <p>Comparacao entre anos para facilitar a leitura de crescimento, reducao e comportamento dos gastos ao longo do tempo.</p>
+        <a href="comparativo-anual-2025.html">Abrir comparativo</a>
+      </article>
+    </section>
+
+    <section class="roadmap">
+      <strong>Proxima evolucao da area</strong>
+      <p>Esta estrutura ja esta pronta para receber novos modulos, como indicadores de contratos, despesas por fornecedor, metas orcamentarias e visoes por centro de custo, sem perder o padrao do portal.</p>
+    </section>
+  </main>
+</body>
+</html>

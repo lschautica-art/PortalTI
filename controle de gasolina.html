@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Combustivel</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+<style>
+  :root {
+    --bg: #f9f9f9;
+    --surface: #ffffff;
+    --surface-2: #f7fafc;
+    --text: #222;
+    --muted: #60758a;
+    --primary: #073954;
+    --secondary: #fb3f3a;
+    --border: #d9e4ec;
+    --shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; background: radial-gradient(circle at top right, rgba(251,63,58,0.12), transparent 22%), radial-gradient(circle at top left, rgba(7,57,84,0.12), transparent 28%), var(--bg); color: var(--text); display: flex; }
+  #sidebar { width: 240px; background: linear-gradient(180deg, #073954 0%, #0b2e47 100%); color: white; height: 100vh; position: fixed; top: 0; left: 0; padding: 24px 18px; box-sizing: border-box; overflow-y: auto; box-shadow: inset -1px 0 0 rgba(255,255,255,0.08); }
+  .sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 6px 8px 18px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+  .sidebar-brand img { width: 62px; height: auto; object-fit: contain; }
+  .sidebar-brand-text strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+  .sidebar-brand-text span { display: block; font-size: 0.82rem; line-height: 1.35; color: rgba(255,255,255,0.74); }
+  #sidebar h2 { text-align: left; margin-bottom: 14px; padding: 0 8px; font-size: 1rem; }
+  #sidebar ul { list-style: none; padding: 0; margin: 0; }
+  #sidebar li { margin: 10px 0; }
+  #sidebar a, #sidebar li span { display: block; color: white; text-decoration: none; padding: 10px 12px; border-radius: 12px; font-weight: bold; transition: background 0.2s, transform 0.2s; }
+  #sidebar a:hover, #sidebar a.active { background: rgba(251,63,58,0.95); transform: translateX(2px); }
+  #sidebar .menu-label { margin-top: 16px; }
+  #sidebar .menu-label span { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.78); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  #mainContent { margin-left: 240px; padding: 20px; width: calc(100% - 240px); }
+  .hero, .panel, .card, .chart-card, .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); }
+  .hero { background: linear-gradient(135deg, #073954, #0b2e47); color: white; padding: 28px 30px; margin-bottom: 24px; }
+  .hero h1 { margin: 0 0 10px; font-size: clamp(1.8rem, 3vw, 2.8rem); }
+  .hero p { margin: 0; max-width: 1000px; color: rgba(255,255,255,0.88); line-height: 1.55; }
+  .layout { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 24px; align-items: start; }
+  .panel { padding: 22px; position: sticky; top: 20px; }
+  .panel h2, .chart-card h3, .table-card h3 { margin: 0 0 16px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; margin-bottom: 8px; font-weight: 600; }
+  .field input, .field select { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 0.97rem; }
+  .field select[multiple] { min-height: 150px; }
+  #combustivelFiltro { font-weight: 600; background: #f3f8fc; }
+  .status, .hint { font-size: 0.9rem; line-height: 1.45; color: var(--muted); }
+  .status { padding: 12px 14px; border-radius: 14px; background: #edf6fb; border: 1px solid #cfe2ee; margin-top: 14px; }
+  .status.error { background: #fff1ef; border-color: #ffc9bf; color: #b14a33; }
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  button { border: 0; border-radius: 14px; padding: 12px 14px; font-weight: 700; cursor: pointer; }
+  .btn-primary { background: var(--secondary); color: #fff; }
+  .btn-secondary { background: #e9f2f7; color: var(--primary); }
+  .content { display: grid; gap: 24px; }
+  .cards { display: grid; grid-template-columns: repeat(4, minmax(180px, 1fr)); gap: 18px; }
+  .card { padding: 22px; }
+  .card span { display: block; font-size: 0.9rem; color: var(--muted); margin-bottom: 8px; }
+  .card strong { font-size: clamp(1.4rem, 2vw, 2rem); color: var(--primary); }
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .chart-card, .table-card { padding: 20px; }
+  .chart-wrap { position: relative; height: 380px; }
+  .chart-wrap.ranking { min-height: 420px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px 10px; border-bottom: 1px solid var(--border); text-align: left; font-size: 0.95rem; }
+  th { color: var(--muted); font-weight: 700; }
+  tbody tr:hover { background: #f8fbfd; }
+  .empty { padding: 32px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--border); border-radius: 18px; }
+  @media (max-width: 1200px) { .layout, .chart-grid { grid-template-columns: 1fr; } .panel { position: static; } .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 900px) { body { display: block; } #sidebar { position: relative; width: 100%; height: auto; } #mainContent { width: 100%; margin-left: 0; } .btn-row { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { #mainContent { padding: 16px; } .cards { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+  <aside id="sidebar">
+    <div class="sidebar-brand">
+      <img src="logo.png" alt="Logo DC">
+      <div class="sidebar-brand-text">
+        <strong>Portal DC</strong>
+        <span>Controles internos e dashboards corporativos.</span>
+      </div>
+    </div>
+    <h2>Menu</h2>
+    <ul>
+      <li><a href="portal.html">Portal Inicial</a></li>
+      <li class="menu-label"><span>Area TI</span></li>
+      <li><a href="portal-ti.html">Tecnologia da Informacao</a></li>
+      <li><a href="dashboard.html">Dashboard TI</a></li>
+      <li><a href="dashboard-2026.html">Dashboard TI - 2026</a></li>
+      <li><a href="comparativo-anual-2025.html">Comparativo Anual</a></li>
+      <li class="menu-label"><span>Area RH</span></li>
+      <li><a href="portal-rh.html">RH</a></li>
+      <li><a href="Controle de gasolina.html" class="active">Controle de combustivel</a></li>
+      <li><a href="index.html">Sair</a></li>
+    </ul>
+  </aside>
+
+  <main id="mainContent">
+    <section class="hero">
+      <h1>Controle de Combustivel</h1>
+      <p>Ao importar o relatorio bruto do portal, o sistema limpa automaticamente os dados usando as colunas fixas que voce definiu: <strong>Y</strong> para data, <strong>F</strong> para placa, <strong>G</strong> para modelo do veiculo, <strong>AN</strong> para tipo de combustivel e <strong>AR</strong> para valor total com desconto.</p>
+    </section>
+
+    <div class="layout">
+      <aside class="panel">
+        <h2>Importacao e filtros</h2>
+
+        <div class="field">
+          <label for="csvFile">CSV de combustivel</label>
+          <input type="file" id="csvFile" accept=".csv">
+        </div>
+
+        <div class="field">
+          <label for="supervisorFiltro">Supervisor</label>
+          <select id="supervisorFiltro">
+            <option value="">Todos os supervisores</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="placaFiltro">Placas</label>
+          <select id="placaFiltro" multiple></select>
+        </div>
+
+        <div class="field">
+          <label for="combustivelFiltro">Tipo de combustivel</label>
+          <select id="combustivelFiltro">
+            <option value="" selected>Todos os tipos</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="mesInicio">Mes inicial</label>
+          <input type="month" id="mesInicio">
+        </div>
+
+        <div class="field">
+          <label for="mesFim">Mes final</label>
+          <input type="month" id="mesFim">
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" id="aplicarFiltros">Aplicar</button>
+          <button class="btn-secondary" id="limparFiltros">Limpar</button>
+        </div>
+
+        <div class="status" id="statusBox">Aguardando CSV. A limpeza automatica prioriza Y, F, G, AN e AR no relatorio bruto.</div>
+
+        <p class="hint">
+          Colunas usadas automaticamente no relatorio bruto:
+          <br>Y = Data
+          <br>F = Placa
+          <br>G = Veiculo
+          <br>AN = Combustivel
+          <br>AR = Valor com desconto
+        </p>
+      </aside>
+
+      <main class="content">
+        <section class="cards">
+          <article class="card"><span>Total filtrado</span><strong id="cardTotal">R$ 0,00</strong></article>
+          <article class="card"><span>Supervisores</span><strong id="cardSupervisores">0</strong></article>
+          <article class="card"><span>Placas</span><strong id="cardPlacas">0</strong></article>
+          <article class="card"><span>Ticket medio por lancamento</span><strong id="cardTicket">R$ 0,00</strong></article>
+        </section>
+
+        <section class="chart-grid">
+          <article class="chart-card">
+            <h3>Gasto mensal total</h3>
+            <div class="chart-wrap"><canvas id="graficoMensal"></canvas></div>
+          </article>
+
+          <article class="chart-card">
+            <h3>Gasto por tipo de combustivel</h3>
+            <div class="chart-wrap ranking"><canvas id="graficoTipo"></canvas></div>
+          </article>
+        </section>
+
+        <section class="table-card">
+          <h3>Ranking por placa e veiculo</h3>
+          <div class="chart-wrap ranking"><canvas id="graficoPlaca"></canvas></div>
+        </section>
+
+        <section class="table-card">
+          <h3>Resumo por tipo de combustivel</h3>
+          <div id="combustivelResumo" class="empty">Importe um CSV para visualizar o resumo por tipo de combustivel.</div>
+        </section>
+
+        <section class="table-card">
+          <h3>Detalhamento por placa e veiculo</h3>
+          <div id="tabelaContainer" class="empty">Importe um CSV para visualizar o resumo por placa e veiculo.</div>
+        </section>
+      </main>
+    </div>
+  </main>
+
+<script>
+  Chart.register(ChartDataLabels);
+
+  const csvFileInput = document.getElementById('csvFile');
+  const supervisorFiltro = document.getElementById('supervisorFiltro');
+  const placaFiltro = document.getElementById('placaFiltro');
+  const combustivelFiltro = document.getElementById('combustivelFiltro');
+  const mesInicio = document.getElementById('mesInicio');
+  const mesFim = document.getElementById('mesFim');
+  const statusBox = document.getElementById('statusBox');
+  const cardTotal = document.getElementById('cardTotal');
+  const cardSupervisores = document.getElementById('cardSupervisores');
+  const cardPlacas = document.getElementById('cardPlacas');
+  const cardTicket = document.getElementById('cardTicket');
+  const combustivelResumo = document.getElementById('combustivelResumo');
+  const tabelaContainer = document.getElementById('tabelaContainer');
+
+  let baseDados = [];
+  let chartMensal = null;
+  let chartTipo = null;
+  let chartPlaca = null;
+
+  function formatarBRL(valor) {
+    return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  function atualizarStatus(texto, erro = false) {
+    statusBox.textContent = texto;
+    statusBox.classList.toggle('error', erro);
+  }
+
+  function indiceColunaExcel(letra) {
+    let total = 0;
+    const texto = String(letra || '').toUpperCase();
+    for (let i = 0; i < texto.length; i += 1) total = (total * 26) + (texto.charCodeAt(i) - 64);
+    return total - 1;
+  }
+
+  function converterValor(valorOriginal) {
+    const limpo = String(valorOriginal || '').replace(/\s/g, '').replace('R$', '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.').replace(/[^0-9.-]/g, '');
+    const numero = parseFloat(limpo);
+    return Number.isFinite(numero) ? numero : 0;
+  }
+
+  function converterData(valorOriginal) {
+    const texto = String(valorOriginal || '').trim();
+    if (!texto) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(texto) || /^\d{4}-\d{2}$/.test(texto)) return texto.slice(0, 7);
+    const br = texto.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+    if (br) return `${br[3]}-${br[2]}`;
+    const data = new Date(texto);
+    if (!Number.isNaN(data.getTime())) return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
+    return null;
+  }
+
+  function obterSelecionados(select) {
+    return Array.from(select.selectedOptions).map((option) => option.value);
+  }
+
+  function destruirGrafico(instancia) {
+    if (instancia) instancia.destroy();
+  }
+
+  function opcoesBaseGrafico() {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 16, right: 60, bottom: 8, left: 8 } },
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          color: '#163047',
+          anchor: 'end',
+          align: 'end',
+          offset: 4,
+          clamp: false,
+          clip: false,
+          font: { weight: 'bold', size: 11 },
+          formatter: (valor) => valor > 0 ? formatarBRL(valor) : ''
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => formatarBRL(context.parsed.y ?? context.parsed.x ?? 0)
+          }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: (value) => formatarBRL(value) } },
+        x: { ticks: { color: '#60758a' } }
+      }
+    };
+  }
+
+  function preencherFiltros() {
+    const supervisores = [...new Set(baseDados.map((item) => item.supervisor))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    const placas = [...new Set(baseDados.map((item) => item.placa))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    const combustiveis = [...new Set(baseDados.map((item) => item.combustivel))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    const meses = [...new Set(baseDados.map((item) => item.mes))].sort();
+
+    supervisorFiltro.innerHTML = '<option value="">Todos os supervisores</option>' + supervisores.map((item) => `<option value="${item}">${item}</option>`).join('');
+    placaFiltro.innerHTML = placas.map((placa) => {
+      const exemplo = baseDados.find((item) => item.placa === placa);
+      return `<option value="${placa}">${placa} - ${exemplo ? exemplo.veiculo : ''}</option>`;
+    }).join('');
+    combustivelFiltro.innerHTML = '<option value="">Todos os tipos</option>' + combustiveis.map((tipo) => {
+      const total = baseDados.filter((item) => item.combustivel === tipo).reduce((soma, item) => soma + item.valor, 0);
+      return `<option value="${tipo}">${tipo} - ${formatarBRL(total)}</option>`;
+    }).join('');
+    combustivelFiltro.value = '';
+
+    if (meses.length) {
+      mesInicio.value = meses[0];
+      mesFim.value = meses[meses.length - 1];
+    }
+  }
+
+  function atualizarCards(dados) {
+    const total = dados.reduce((soma, item) => soma + item.valor, 0);
+    cardTotal.textContent = formatarBRL(total);
+    cardSupervisores.textContent = String(new Set(dados.map((item) => item.supervisor)).size);
+    cardPlacas.textContent = String(new Set(dados.map((item) => item.placa)).size);
+    cardTicket.textContent = formatarBRL(dados.length ? total / dados.length : 0);
+  }
+
+  function atualizarGraficoMensal(dados) {
+    const agrupado = {};
+    dados.forEach((item) => { agrupado[item.mes] = (agrupado[item.mes] || 0) + item.valor; });
+    const labels = Object.keys(agrupado).sort();
+    const valores = labels.map((label) => agrupado[label]);
+    const maiorValor = valores.length ? Math.max(...valores) : 0;
+    destruirGrafico(chartMensal);
+    chartMensal = new Chart(document.getElementById('graficoMensal').getContext('2d'), {
+      type: 'bar',
+      data: { labels, datasets: [{ data: valores, backgroundColor: '#0a5678', borderRadius: 8 }] },
+      options: {
+        ...opcoesBaseGrafico(),
+        layout: { padding: { top: 28, right: 60, bottom: 8, left: 8 } },
+        scales: {
+          y: {
+            beginAtZero: true,
+            suggestedMax: maiorValor ? maiorValor * 1.15 : undefined,
+            ticks: { callback: (value) => formatarBRL(value) }
+          },
+          x: {
+            ticks: { color: '#60758a' }
+          }
+        }
+      }
+    });
+  }
+
+  function atualizarGraficoTipo(dados) {
+    const agrupado = {};
+    dados.forEach((item) => { agrupado[item.combustivel] = (agrupado[item.combustivel] || 0) + item.valor; });
+    const ranking = Object.entries(agrupado).sort((a, b) => b[1] - a[1]);
+    destruirGrafico(chartTipo);
+    chartTipo = new Chart(document.getElementById('graficoTipo').getContext('2d'), {
+      type: 'bar',
+      data: { labels: ranking.map(([nome]) => nome), datasets: [{ data: ranking.map(([, valor]) => valor), backgroundColor: ['#ff6b35', '#fb3f3a', '#0a5678', '#17a673', '#ffc38f'], borderRadius: 8 }] },
+      options: { ...opcoesBaseGrafico(), indexAxis: 'y' }
+    });
+  }
+
+  function atualizarGraficoPlaca(dados) {
+    const agrupado = {};
+    dados.forEach((item) => {
+      const chave = `${item.placa} - ${item.veiculo}`;
+      agrupado[chave] = (agrupado[chave] || 0) + item.valor;
+    });
+    const ranking = Object.entries(agrupado).sort((a, b) => b[1] - a[1]);
+    const altura = Math.max(420, ranking.length * 36);
+    document.getElementById('graficoPlaca').parentElement.style.height = `${altura}px`;
+    destruirGrafico(chartPlaca);
+    chartPlaca = new Chart(document.getElementById('graficoPlaca').getContext('2d'), {
+      type: 'bar',
+      data: { labels: ranking.map(([nome]) => nome), datasets: [{ data: ranking.map(([, valor]) => valor), backgroundColor: '#0a5678', borderRadius: 8 }] },
+      options: { ...opcoesBaseGrafico(), indexAxis: 'y' }
+    });
+  }
+
+  function atualizarResumoCombustivel(dados) {
+    if (!dados.length) {
+      combustivelResumo.className = 'empty';
+      combustivelResumo.textContent = 'Nenhum dado encontrado para o tipo de combustivel selecionado.';
+      return;
+    }
+    const agrupado = {};
+    dados.forEach((item) => {
+      if (!agrupado[item.combustivel]) agrupado[item.combustivel] = { total: 0, placas: new Set(), lancamentos: 0 };
+      agrupado[item.combustivel].total += item.valor;
+      agrupado[item.combustivel].placas.add(item.placa);
+      agrupado[item.combustivel].lancamentos += 1;
+    });
+    const linhas = Object.entries(agrupado).sort((a, b) => b[1].total - a[1].total);
+    combustivelResumo.className = '';
+    combustivelResumo.innerHTML = `<table><thead><tr><th>Combustivel</th><th>Total</th><th>Placas</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map(([tipo, info]) => `<tr><td>${tipo}</td><td>${formatarBRL(info.total)}</td><td>${info.placas.size}</td><td>${info.lancamentos}</td></tr>`).join('')}</tbody></table>`;
+  }
+
+  function atualizarTabela(dados) {
+    if (!dados.length) {
+      tabelaContainer.className = 'empty';
+      tabelaContainer.textContent = 'Nenhum dado encontrado com os filtros aplicados.';
+      return;
+    }
+    const resumo = {};
+    dados.forEach((item) => {
+      const chave = `${item.supervisor}|||${item.placa}|||${item.veiculo}`;
+      if (!resumo[chave]) resumo[chave] = { supervisor: item.supervisor, placa: item.placa, veiculo: item.veiculo, combustivel: item.combustivel, total: 0, lancamentos: 0 };
+      if (resumo[chave].combustivel !== item.combustivel) resumo[chave].combustivel = 'Multiplos';
+      resumo[chave].total += item.valor;
+      resumo[chave].lancamentos += 1;
+    });
+    const linhas = Object.values(resumo).sort((a, b) => b.total - a.total);
+    tabelaContainer.className = '';
+    tabelaContainer.innerHTML = `<table><thead><tr><th>Supervisor</th><th>Placa</th><th>Veiculo</th><th>Combustivel</th><th>Total</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map((linha) => `<tr><td>${linha.supervisor}</td><td>${linha.placa}</td><td>${linha.veiculo}</td><td>${linha.combustivel}</td><td>${formatarBRL(linha.total)}</td><td>${linha.lancamentos}</td></tr>`).join('')}</tbody></table>`;
+  }
+
+  function aplicarFiltros() {
+    if (!baseDados.length) return;
+    const supervisor = supervisorFiltro.value;
+    const placas = obterSelecionados(placaFiltro);
+    const combustivel = combustivelFiltro.value;
+    const inicio = mesInicio.value || '0000-00';
+    const fim = mesFim.value || '9999-12';
+
+    const filtrado = baseDados.filter((item) => {
+      const okSupervisor = !supervisor || item.supervisor === supervisor;
+      const okPlaca = !placas.length || placas.includes(item.placa);
+      const okCombustivel = !combustivel || item.combustivel === combustivel;
+      const okPeriodo = item.mes >= inicio && item.mes <= fim;
+      return okSupervisor && okPlaca && okCombustivel && okPeriodo;
+    });
+
+    atualizarCards(filtrado);
+    atualizarGraficoMensal(filtrado);
+    atualizarGraficoTipo(filtrado);
+    atualizarGraficoPlaca(filtrado);
+    atualizarResumoCombustivel(filtrado);
+    atualizarTabela(filtrado);
+  }
+
+  function limparFiltros() {
+    supervisorFiltro.value = '';
+    combustivelFiltro.value = '';
+    Array.from(placaFiltro.options).forEach((option) => option.selected = false);
+    const meses = [...new Set(baseDados.map((item) => item.mes))].sort();
+    if (meses.length) {
+      mesInicio.value = meses[0];
+      mesFim.value = meses[meses.length - 1];
+    }
+    aplicarFiltros();
+  }
+
+  function carregarTextoCSV(texto, origem = 'arquivo importado') {
+    Papa.parse(texto, {
+      header: true,
+      skipEmptyLines: true,
+      delimiter: '',
+      complete: ({ data, meta }) => {
+        const colunas = meta.fields || [];
+        const usaRelatorioBruto = colunas.length >= indiceColunaExcel('AR') + 1;
+        const colSupervisor = usaRelatorioBruto ? (colunas[indiceColunaExcel('D')] || colunas[indiceColunaExcel('C')]) : 'Supervisor';
+        const colPlaca = usaRelatorioBruto ? colunas[indiceColunaExcel('F')] : 'Placa';
+        const colVeiculo = usaRelatorioBruto ? colunas[indiceColunaExcel('G')] : 'Veiculo';
+        const colData = usaRelatorioBruto ? colunas[indiceColunaExcel('Y')] : 'Data';
+        const colCombustivel = usaRelatorioBruto ? colunas[indiceColunaExcel('AN')] : 'Combustivel';
+        const colValor = usaRelatorioBruto ? colunas[indiceColunaExcel('AR')] : 'Valor';
+
+        if (!colPlaca || !colVeiculo || !colData || !colCombustivel || !colValor) {
+          atualizarStatus('Nao encontrei as colunas exigidas. Para o relatorio bruto, a limpeza automatica usa Y, F, G, AN e AR.', true);
+          return;
+        }
+
+        baseDados = data.map((linha) => ({
+          supervisor: String(linha[colSupervisor] || 'Sem agrupamento').trim(),
+          placa: String(linha[colPlaca] || '').trim(),
+          veiculo: String(linha[colVeiculo] || 'Veiculo nao informado').trim(),
+          mes: converterData(linha[colData]),
+          combustivel: String(linha[colCombustivel] || 'Nao informado').trim(),
+          valor: converterValor(linha[colValor])
+        })).filter((item) => item.placa && item.veiculo && item.mes && item.combustivel && item.valor >= 0);
+
+        if (!baseDados.length) {
+          atualizarStatus('O CSV foi lido, mas nao encontrei linhas validas para montar o dashboard.', true);
+          return;
+        }
+
+        atualizarStatus(`CSV carregado com sucesso a partir de ${origem}. ${baseDados.length} lancamentos encontrados. Limpeza automatica usando ${usaRelatorioBruto ? 'Y, F, G, AN e AR' : 'o modelo padrao'}.`);
+        preencherFiltros();
+        aplicarFiltros();
+      },
+      error: () => atualizarStatus('Nao foi possivel ler o CSV selecionado.', true)
+    });
+  }
+
+  csvFileInput.addEventListener('change', (event) => {
+    const arquivo = event.target.files[0];
+    if (!arquivo) return;
+    Papa.parse(arquivo, {
+      header: true,
+      skipEmptyLines: true,
+      delimiter: '',
+      complete: ({ data, meta }) => {
+        const textoReconstruido = Papa.unparse({ fields: meta.fields, data: data.map((item) => meta.fields.map((campo) => item[campo])) });
+        carregarTextoCSV(textoReconstruido, arquivo.name);
+      },
+      error: () => atualizarStatus('Nao foi possivel importar o arquivo selecionado.', true)
+    });
+  });
+
+  document.getElementById('aplicarFiltros').addEventListener('click', aplicarFiltros);
+  document.getElementById('limparFiltros').addEventListener('click', limparFiltros);
+  supervisorFiltro.addEventListener('change', aplicarFiltros);
+  combustivelFiltro.addEventListener('change', aplicarFiltros);
+
+  fetch('controle-gasolina.csv')
+    .then((response) => {
+      if (!response.ok) throw new Error('arquivo nao encontrado');
+      return response.text();
+    })
+    .then((texto) => carregarTextoCSV(texto, 'controle-gasolina.csv'))
+    .catch(() => atualizarStatus('HTML pronto. Selecione um CSV para iniciar a leitura.', false));
+</script>
+</body>
+</html>

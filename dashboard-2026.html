@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard Completo - Gastos TI - 2026</title>
+
+<!-- Chart.js e plugins -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+
+<style>
+  /* Reset e básicos */
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); transition: background-color 0.3s, color 0.3s; }
+  :root {
+    --bg: #f9f9f9;
+    --text: #222;
+    --primary: #073954;
+    --secondary: #fb3f3a;
+    --card-bg: #fff;
+    --card-shadow: rgba(0,0,0,0.1);
+    --meta-line: #fb3f3a;
+  }
+  body.dark { --bg: #121212; --text: #eee; --card-bg: #1e1e1e; --card-shadow: rgba(255,255,255,0.05); --meta-line: #fb3f3a; }
+  h1,h2,h3 { margin: 0 0 10px 0; }
+  h1 { text-align: center; }
+
+  /* Layout sidebar + conteúdo */
+  body { display: flex; }
+  #sidebar { width: 240px; background: linear-gradient(180deg, #073954 0%, #0b2e47 100%); color: white; height: 100vh; position: fixed; top: 0; left: 0; padding: 24px 18px; box-sizing: border-box; overflow-y: auto; box-shadow: inset -1px 0 0 rgba(255,255,255,0.08); }
+  .sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 6px 8px 18px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+  .sidebar-brand img { width: 62px; height: auto; object-fit: contain; }
+  .sidebar-brand-text strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+  .sidebar-brand-text span { display: block; font-size: 0.82rem; line-height: 1.35; color: rgba(255,255,255,0.74); }
+  #sidebar h2 { text-align: left; margin-bottom: 14px; padding: 0 8px; font-size: 1rem; }
+  #sidebar ul { list-style: none; padding: 0; margin: 0; }
+  #sidebar ul li { margin: 10px 0; }
+  #sidebar ul li a, #sidebar ul li span { color: white; text-decoration: none; display: block; padding: 10px 12px; border-radius: 12px; font-weight: bold; transition: background 0.2s, transform 0.2s; }
+  #sidebar ul li a:hover, #sidebar ul li a.active { background: rgba(251,63,58,0.95); transform: translateX(2px); }
+  #sidebar .menu-label { margin-top: 16px; }
+  #sidebar .menu-label span { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.78); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  #mainContent { margin-left: 240px; padding: 20px; width: calc(100% - 240px); }
+
+  /* Botão tema */
+  .theme-toggle { position: fixed; top: 15px; right: 15px; background: var(--secondary); border: none; color: white; padding: 10px 18px; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px rgba(251,63,58,0.6); z-index: 100; }
+  .theme-toggle:hover { background: #a82824; }
+
+  /* Cards resumo */
+  .resumo-cards { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; justify-content: center; }
+  .card { background: var(--card-bg); box-shadow: 0 0 10px var(--card-shadow); padding: 15px 25px; border-radius: 8px; min-width: 140px; flex: 1 1 140px; text-align: center; }
+  .card strong { font-size: 1.6rem; display: block; margin-bottom: 5px; color: var(--primary); }
+
+  /* Filtros */
+  .filtros { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 20px; margin-bottom: 30px; }
+  select,input[type=month] { padding: 8px 12px; border-radius: 25px; border: 2px solid var(--secondary); font-size: 1rem; min-width: 160px; cursor: pointer; background: var(--card-bg); color: var(--text); transition: background-color 0.3s,color 0.3s; }
+  select:hover,input[type=month]:hover { background: var(--secondary); color:white; }
+  select:focus,input[type=month]:focus { outline:none; border-color: var(--primary); }
+
+  /* Gráficos */
+  .grafico { margin-bottom: 45px; }
+  .grafico h3 { font-size:1.8rem; font-weight:bold; text-align:center; margin-bottom:10px; color:var(--primary); }
+  .grafico canvas { max-width:100%; height:600px; border-radius:8px; box-shadow:0 3px 8px rgba(0,0,0,0.12); display:inline-block; }
+
+  /* Gráfico anual maior */
+  #pizzaContainer { width:100%; max-width:100%; height:700px; margin:0 auto 40px auto; }
+  #pizzaContainer canvas { width:100% !important; height:100% !important; display:block; }
+
+  /* Exportar */
+  .btn-export { display:inline-block; background:var(--secondary); border-radius:25px; padding:10px 18px; color:white; font-weight:bold; border:none; cursor:pointer; box-shadow:0 0 10px rgba(251,63,58,0.6); transition:background-color 0.3s; margin-top:10px; }
+  .btn-export:hover { background:#a82824; }
+
+  /* Notas */
+  #notasContainer { max-width:900px; margin:0 auto 40px auto; }
+  #notasContainer textarea { width:100%; min-height:100px; border-radius:8px; border:2px solid var(--secondary); padding:15px; font-size:1rem; resize:vertical; background:var(--card-bg); color:var(--text); transition: background-color 0.3s,color 0.3s; }
+  #notasContainer textarea::placeholder { color:#aaa; }
+
+  /* Responsivo */
+  @media(max-width:900px){ .grafico canvas{height:320px;} .resumo-cards{flex-direction:column;align-items:center;} #mainContent{margin-left:0;width:100%;} #sidebar{position:relative;width:100%;height:auto;} }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-brand">
+    <img src="logo.png" alt="Logo DC">
+    <div class="sidebar-brand-text">
+      <strong>Portal DC</strong>
+      <span>Controles internos e dashboards corporativos.</span>
+    </div>
+  </div>
+  <h2>Menu</h2>
+  <ul>
+   <li><a href="portal.html">Portal Inicial</a></li>
+   <li class="menu-label"><span>Area TI</span></li>
+   <li><a href="portal-ti.html">Tecnologia da Informacao</a></li>
+   <li><a href="dashboard.html">Dashboard TI</a></li>
+   <li><a href="#" class="active">Dashboard TI - 2026</a></li>
+   <li><a href="comparativo-anual-2025.html">Comparativo Anual</a></li>
+   <li class="menu-label"><span>Area RH</span></li>
+   <li><a href="portal-rh.html">RH</a></li>
+   <li><a href="Controle de gasolina.html">Controle de combustivel</a></li>
+    <li><a href="index.html">Sair</a></li>
+  </ul>
+</div>
+
+<div id="mainContent">
+  <button class="theme-toggle" id="themeToggle">Modo Escuro</button>
+
+  <h1>Dashboard Completo - Gastos TI - 2026</h1>
+
+  <!-- Cards resumo -->
+  <div class="resumo-cards" id="resumoCards"></div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <select id="fornecedorFiltro" multiple size="5" title="Selecione fornecedores"></select>
+    <input type="month" id="mesInicio" title="Mês início" />
+    <input type="month" id="mesFim" title="Mês fim" />
+  </div>
+
+  <!-- Gráficos -->
+  <div id="graficosContainer"></div>
+  
+
+</div>
+
+
+<script>
+  // Mantive seu JS original, apenas ajustei:
+  // 1) Gráfico anual usa só cor azul (#073954)
+  // 2) Labels BRL acima da barra (datalabels)
+  // 3) Integração sidebar + mainContent
+
+  // (TODO: incluir todo o seu JS atual daqui, sem alteração, mantendo funções: carregarDados, criarResumo, criarGraficos, criarGraficoPorFornecedor, notas, toggleTema etc.)
+
+</script>
+
+</body>
+</html>
+
+<script>
+  // Metas personalizadas por fornecedor - EDITE AQUI para mudar metas
+  const metasPorFornecedor = {
+    "FLUIDATA": 853.17,
+    "VIVO": 5000,
+    "TOTVS": 17312.19,
+    "DIGITAL LOCACOES": 500,
+    "NEOGRID": 1104.92,
+    "SETI": 887,
+    "QI NETWORK": 2895.80,
+    "DKIROS": 504.40,
+    "UNIFIQUE": 2789.90,
+    "TSC TECNOLOGIA": 5000,
+    "MOBILITEC": 7000,
+    "INOVASSE": 1165.74,
+    "CENTRAL XML": 254.80,
+    "GRUPPE": 3000,
+    "SOLIDES TANGERINO":1000,
+    "LOGSYNC": 990,
+    "NEXXERA": 500,
+    "IMPRIMER": 3000,
+    "PONTOCOM": 149.90,
+    "B&R SOLUCOES": 1059,
+    "TRADEPRO TECNOLOGIA": 1984.00,
+    "ASV INTELIGÊNCIA DE DADOS": 1200.00,
+    "RD STATION CONVERSAS": 2899.00,
+    "RMA SERVICOS": 250
+  };
+ //Gerar cores
+  function gerarCores(num) {
+  const cores = [];
+  for (let i = 0; i < num; i++) {
+    const hue = Math.floor((i * 360) / num); // distribui tons no círculo de cores
+    cores.push(`hsl(${hue}, 70%, 45%)`);
+  }
+  return cores;
+}
+  // Variáveis globais
+  let dadosPorFornecedor = {};
+  let fornecedores = [];
+  let mesesOrdenados = [];
+  let charts = {};
+  let pizzaChart = null;
+  let notas = {}; // notas por fornecedor
+
+  // Função para formatar moeda BRL
+  function formatarBRL(valor) {
+    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  // Função para ordenar meses (string YYYY-MM)
+  function ordenarMeses(meses) {
+    return meses.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  }
+
+  // Carregar CSV e montar dashboard
+  function carregarDados() {
+    Papa.parse('dados26.csv', {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        const dados = results.data.filter(item => item.Fornecedor && item.Mês && item.Valor);
+
+        dadosPorFornecedor = {};
+        fornecedores = [];
+        mesesOrdenados = [];
+
+        dados.forEach(item => {
+          const f = item.Fornecedor.trim();
+          const mes = item.Mês.trim();
+
+          let valorStr = item.Valor ? item.Valor.toString().trim() : '';
+          if (!valorStr || valorStr === '-' || valorStr === '') return;
+
+          valorStr = valorStr.replace(/^R\$ ?/, '').replace(/[^0-9,\.]/g, '').replace(',', '.');
+          const valor = parseFloat(valorStr);
+          if (isNaN(valor)) return;
+
+          if (!dadosPorFornecedor[f]) dadosPorFornecedor[f] = {};
+          dadosPorFornecedor[f][mes] = valor;
+
+          if (!fornecedores.includes(f)) fornecedores.push(f);
+          if (!mesesOrdenados.includes(mes)) mesesOrdenados.push(mes);
+        });
+
+        mesesOrdenados = ordenarMeses(mesesOrdenados);
+
+        preencherFiltros();
+        criarResumo();
+        criarGraficos();
+        criarGraficoPorFornecedor();
+        carregarNotas();
+      },
+      error: function(err) {
+        console.error('Erro ao carregar CSV:', err);
+      }
+    });
+  }
+  
+
+  // Preenche select de fornecedores e meses
+  function preencherFiltros() {
+    const selectForn = document.getElementById('fornecedorFiltro');
+    selectForn.innerHTML = '';
+    fornecedores.forEach(f => {
+      const option = document.createElement('option');
+      option.value = f;
+      option.textContent = f;
+      option.selected = true;
+      selectForn.appendChild(option);
+    });
+
+    const mesInicio = document.getElementById('mesInicio');
+    const mesFim = document.getElementById('mesFim');
+    if (mesesOrdenados.length) {
+      mesInicio.value = mesesOrdenados[0];
+      mesFim.value = mesesOrdenados[mesesOrdenados.length -1];
+      mesInicio.min = mesesOrdenados[0];
+      mesInicio.max = mesesOrdenados[mesesOrdenados.length -1];
+      mesFim.min = mesesOrdenados[0];
+      mesFim.max = mesesOrdenados[mesesOrdenados.length -1];
+    }
+  }
+
+  // Cria cards resumo total, média, maior gasto
+ function criarResumo() {
+  const div = document.getElementById('resumoCards');
+  div.innerHTML = '';
+
+  const mesInicio = document.getElementById('mesInicio').value;
+  const mesFim = document.getElementById('mesFim').value;
+
+  // Fornecedores selecionados no filtro
+  const selecionados = Array.from(
+    document.getElementById('fornecedorFiltro').selectedOptions
+  ).map(o => o.value);
+
+  let totalGeral = 0;
+  let mesesUsados = new Set();
+  let maiorGasto = 0;
+
+  selecionados.forEach(f => {
+    const meses = Object.keys(dadosPorFornecedor[f] || {}).filter(
+      m => m >= mesInicio && m <= mesFim
+    );
+
+    meses.forEach(m => {
+      const valor = dadosPorFornecedor[f][m] || 0;
+
+      totalGeral += valor;
+      mesesUsados.add(m);
+
+      if (valor > maiorGasto) maiorGasto = valor;
+    });
+  });
+
+  const quantidadeMeses = mesesUsados.size;
+  const media = quantidadeMeses > 0 ? totalGeral / quantidadeMeses : 0;
+
+  const meta       = 61299.82;
+  const futuro     = 735597.84;
+
+  const cards = [
+    { titulo: 'Total do Período',       valor: formatarBRL(totalGeral) },
+    { titulo: 'Média Mensal',           valor: formatarBRL(media) },
+    { titulo: 'Maior Gasto',            valor: formatarBRL(maiorGasto) },
+    { titulo: 'Meta de Gasto Mensal',   valor: formatarBRL(meta) },
+    { titulo: 'Meta de Gasto 2026',     valor: formatarBRL(futuro) },
+  ];
+
+  cards.forEach(c => {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.innerHTML = `<strong>${c.valor}</strong><span>${c.titulo}</span>`;
+    div.appendChild(card);
+  });
+}
+
+
+  // Função que filtra meses de acordo com intervalo selecionado
+  function filtrarMeses(meses, inicio, fim) {
+    return meses.filter(m => m >= inicio && m <= fim);
+  }
+
+  // Cria gráficos
+  function criarGraficos() {
+    const container = document.getElementById('graficosContainer');
+    container.innerHTML = '';
+    if (charts) {
+      Object.values(charts).forEach(c => c.forEach(chart => chart.destroy()));
+    }
+    charts = {};
+
+    const selectForn = document.getElementById('fornecedorFiltro');
+    const mesInicio = document.getElementById('mesInicio').value;
+    const mesFim = document.getElementById('mesFim').value;
+
+    const selecionados = Array.from(selectForn.selectedOptions).map(opt => opt.value);
+
+    selecionados.forEach(fornecedor => {
+      // Preparar dados do fornecedor filtrado por mês
+      const mesesFornecedor = Object.keys(dadosPorFornecedor[fornecedor]).filter(m => m >= mesInicio && m <= mesFim);
+      const mesesFiltrados = ordenarMeses(mesesFornecedor);
+      const valores = mesesFiltrados.map(m => dadosPorFornecedor[fornecedor][m]);
+
+      // Container gráfico
+      const divGrafico = document.createElement('div');
+      divGrafico.classList.add('grafico');
+      container.appendChild(divGrafico);
+
+      // Título
+      const h3 = document.createElement('h3');
+
+// Normaliza nome para buscar imagem
+const imgNome = fornecedor
+  .normalize("NFD") // remove acentos
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/\s+/g, "_"); // troca espaços por underline
+
+// Caminho da logo
+const logoPath = `logos/${imgNome}.png`;
+
+// HTML do título com tentativa de logo
+h3.innerHTML = `
+  <img src="${logoPath}" alt="${fornecedor}" 
+       style="height:35px; vertical-align:middle; margin-right:8px;"
+       onerror="this.style.display='none'">
+  ${fornecedor}
+`;
+
+divGrafico.appendChild(h3);
+
+      // Canvas para gráfico de barras
+      const canvasBar = document.createElement('canvas');
+      divGrafico.appendChild(canvasBar);
+
+      // Meta do fornecedor para linha
+      const meta = metasPorFornecedor[fornecedor] ?? 0;
+
+      // Calcular máximo entre valores e meta para ajustar o eixo Y
+const maxValor = Math.max(...valores);
+const maxEixoY = Math.max(maxValor, meta) * 1.1; // 10% acima do maior valor
+
+      // Criar gráfico de barras
+      const ctxBar = canvasBar.getContext('2d');
+const chartBar = new Chart(ctxBar, {
+  type: 'bar',
+  data: {
+    labels: mesesFiltrados,
+    datasets: [
+      {
+        label: 'Gastos (R$)',
+        data: valores,
+        backgroundColor: '#073954',
+        borderColor: '#073954',
+        borderWidth: 1,
+        borderRadius: 4,
+        order: 2
+      },
+      ...(meta !== 0 ? [{
+        label: 'Meta (R$)',
+        data: mesesFiltrados.map(() => meta),
+        type: 'line',
+        borderColor: 'green',
+        borderWidth: 3,
+        fill: false,
+        pointRadius: 0,
+        tension: 0.5,
+        order: 1,
+        datalabels: {
+          display: false
+        }
+      }] : [])
+    ]
+  },
+  options: {
+    responsive: true,
+    animation: { duration: 800 },
+    layout: {
+      padding: {
+        top: 10
+      }
+    },
+    plugins: {
+      legend: { labels: { usePointStyle: true } },
+      datalabels: {
+        anchor: 'end',
+        align: 'end',
+        color: '#fb3f3a',
+        font: { weight: 'bold', size: 15 },
+        formatter: v => formatarBRL(v)
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx => {
+            const label = ctx.dataset.label || '';
+            const valor = ctx.parsed.y ?? ctx.parsed;
+            return `${label}: ${formatarBRL(valor)}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: maxEixoY,
+        ticks: { callback: v => formatarBRL(v) }
+      }
+    }
+  },
+  plugins: [ChartDataLabels]
+});
+      charts[fornecedor] = [chartBar];
+
+      // Botão exportar
+      const btnExport = document.createElement('button');
+      btnExport.textContent = 'Exportar gráficos como PNG';
+      btnExport.classList.add('btn-export');
+      btnExport.onclick = () => {
+        exportChartsAsImage(chartBar, fornecedor);
+      };
+      divGrafico.appendChild(btnExport);
+    });
+  }
+
+  // Exportar gráficos como PNG (concatena os dois lado a lado)
+  function exportChartsAsImage(chartBar, nomeFornecedor) {
+  const canvasBar = chartBar.canvas;
+
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width = canvasBar.width;
+  exportCanvas.height = canvasBar.height;
+
+  const ctx = exportCanvas.getContext('2d');
+  ctx.drawImage(canvasBar, 0, 0);
+
+  const link = document.createElement('a');
+  link.download = `${nomeFornecedor}_grafico.png`;
+  link.href = exportCanvas.toDataURL('image/png');
+  link.click();
+}
+  // Criar gráfico pizza de proporção anual
+  // Cria gráfico de barras mostrando total por fornecedor
+// Cria gráfico anual de barras (substitui gráfico de pizza)
+function criarGraficoPorFornecedor() {
+  const ctx = document.getElementById('pizzaChart').getContext('2d');
+  if (pizzaChart) pizzaChart.destroy();
+
+  const labels = fornecedores;
+  const data = fornecedores.map(f => {
+    const valores = Object.values(dadosPorFornecedor[f] || {});
+    return valores.reduce((a, b) => a + b, 0);
+  });
+
+  const metaGeral = 61299.82;
+
+  const maxValor = Math.max(...data);
+  const maxEixoY = Math.max(maxValor, metaGeral) * 1.1;
+
+  pizzaChart = new Chart(ctx, {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar',
+          label: 'Total por Fornecedor (R$)',
+          data,
+          backgroundColor: '#073954',
+          borderColor: '#073954',
+          borderWidth: 1,
+          borderRadius: 4,
+          order: 2,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 800 },
+      plugins: { legend: { labels: { usePointStyle: true } } },
+      scales: { y: { beginAtZero: true, max: maxEixoY } }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+ 
+  // Atualizar gráficos quando filtros mudam
+  function ativarFiltros() {
+    const selectForn = document.getElementById('fornecedorFiltro');
+    const mesInicio = document.getElementById('mesInicio');
+    const mesFim = document.getElementById('mesFim');
+
+    [selectForn, mesInicio, mesFim].forEach(el => {
+      el.addEventListener('change', () => {
+        // Validar intervalo
+        if (mesInicio.value > mesFim.value) {
+          alert('Mês início deve ser anterior ou igual ao mês fim.');
+          return;
+        }
+        criarResumo();
+        criarGraficos();
+        
+      
+      });
+    });
+  }
+
+  // Alternar tema claro/escuro
+  function toggleTema() {
+    const btn = document.getElementById('themeToggle');
+    btn.onclick = () => {
+      document.body.classList.toggle('dark');
+      btn.textContent = document.body.classList.contains('dark') ? 'Modo Claro' : 'Modo Escuro';
+    };
+  }
+
+  // Inicialização
+  window.onload = () => {
+    toggleTema();
+    carregarDados();
+    ativarFiltros();
+  };
+</script>
+
+</body>
+</html>
