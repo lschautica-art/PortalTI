@@ -45,7 +45,8 @@
   .field label { display: block; margin-bottom: 8px; font-weight: 600; }
   .field input, .field select { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 0.97rem; }
   .field select[multiple] { min-height: 150px; }
-  #combustivelFiltro { font-weight: 600; background: #f3f8fc; }
+  #placaFiltro, #combustivelFiltro { font-weight: 600; background: #f3f8fc; }
+  .field small { display: block; margin-top: 6px; color: var(--muted); font-size: 0.82rem; }
   .status, .hint { font-size: 0.9rem; line-height: 1.45; color: var(--muted); }
   .status { padding: 12px 14px; border-radius: 14px; background: #edf6fb; border: 1px solid #cfe2ee; margin-top: 14px; }
   .status.error { background: #fff1ef; border-color: #ffc9bf; color: #b14a33; }
@@ -129,11 +130,13 @@
         <div class="field">
           <label for="placaFiltro">Placas</label>
           <select id="placaFiltro" multiple></select>
+          <small>Voce pode selecionar varias placas ao mesmo tempo.</small>
         </div>
 
         <div class="field">
           <label for="combustivelFiltro">Tipo de combustivel</label>
           <select id="combustivelFiltro" multiple></select>
+          <small>Voce pode selecionar varios tipos ao mesmo tempo.</small>
         </div>
 
         <div class="field">
@@ -535,6 +538,7 @@
   document.getElementById('aplicarFiltros').addEventListener('click', aplicarFiltros);
   document.getElementById('limparFiltros').addEventListener('click', limparFiltros);
   supervisorFiltro.addEventListener('change', aplicarFiltros);
+  placaFiltro.addEventListener('change', aplicarFiltros);
   combustivelFiltro.addEventListener('change', aplicarFiltros);
   mesInicio.addEventListener('change', aplicarFiltros);
   mesFim.addEventListener('change', aplicarFiltros);
