@@ -19,26 +19,6 @@
   button { background:linear-gradient(45deg,#fb3f3a,#d73731); border:none; color:white; font-size:1.1rem; font-weight:700; padding:14px 0; width:100%; border-radius:10px; cursor:pointer; box-shadow:0 6px 18px rgba(251,63,58,0.5); transition:0.3s ease; margin-top:5px; }
   button:hover:not(:disabled) { background:linear-gradient(45deg,#d73731,#fb3f3a); transform:translateY(-2px); box-shadow:0 8px 22px rgba(215,55,49,0.7); }
   button:disabled { background:gray; cursor:not-allowed; box-shadow:none; }
-  .btn-secundario {
-    display:block;
-    width:100%;
-    text-align:center;
-    text-decoration:none;
-    background:linear-gradient(45deg,#073954,#0b2e47);
-    color:white;
-    font-size:1.1rem;
-    font-weight:700;
-    padding:14px 0;
-    border-radius:10px;
-    box-shadow:0 6px 18px rgba(7,57,84,0.35);
-    transition:0.3s ease;
-    margin-top:10px;
-  }
-  .btn-secundario:hover {
-    background:linear-gradient(45deg,#0b2e47,#073954);
-    transform:translateY(-2px);
-    box-shadow:0 8px 22px rgba(7,57,84,0.5);
-  }
   .msg { position:absolute; top:-35px; left:50%; transform:translateX(-50%); padding:10px 18px; border-radius:6px; font-weight:600; font-size:0.9rem; display:none; color:white; box-shadow:0 3px 10px rgba(0,0,0,0.3); }
   .error-msg { background:#ff4f4f; }
   .success-msg { background:#28a745; }
@@ -46,7 +26,6 @@
   @media(max-width:400px){ .login-container{width:90%; padding:30px 20px;} .login-container h2{font-size:1.8rem;} }
 </style>
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div class="login-container">
@@ -54,27 +33,18 @@
     <div class="msg success-msg" id="successMsg"></div>
     <img src="logo.png" alt="Logo da Empresa" class="logo" />
     <h2>Login - Gastos TI</h2>
-
     <div class="input-group">
       <i class="fas fa-user"></i>
-      <input type="email" id="usuario" placeholder="Digite seu e-mail" autocomplete="off" />
+      <input type="text" id="usuario" placeholder="Digite seu usuário" autocomplete="off" />
     </div>
-
     <div class="input-group">
       <i class="fas fa-lock"></i>
       <input type="password" id="senha" placeholder="Digite sua senha" autocomplete="off" />
     </div>
-
     <button onclick="fazerLogin()" id="btnLogin">Entrar</button>
-    <a href="cadastro.html" id="btnCadastro" class="btn-secundario">Criar conta</a>
   </div>
 
 <script>
-  const supabase = window.supabase.createClient(
-    "https://nfbcjunuanwjsciajifg.supabase.co",
-    "sb_publishable_fFiZCvpwkFgcOLob6SVQ7Q_6yJqiDqz"
-  );
-
   const errorMsg = document.getElementById('errorMsg');
   const successMsg = document.getElementById('successMsg');
   const btnLogin = document.getElementById('btnLogin');
@@ -100,89 +70,44 @@
     inputSenha.classList.remove('error');
   }
 
-  function setBotoesCarregando(carregando, textoLogin = "Entrar"){
-    btnLogin.disabled = carregando;
-    btnLogin.textContent = textoLogin;
-  }
-
-  function getMensagemErroAuth(error){
-    if(!error || !error.message){
-      return "Nao foi possivel concluir a operacao.";
-    }
-
-    const mensagem = error.message.toLowerCase();
-
-    if(mensagem.includes("invalid login credentials")){
-      return "E-mail ou senha incorretos.";
-    }
-
-    if(mensagem.includes("user already registered")){
-      return "Este e-mail ja esta cadastrado. Tente fazer login.";
-    }
-
-    if(mensagem.includes("password should be at least")){
-      return "A senha deve ter pelo menos 6 caracteres.";
-    }
-
-    if(mensagem.includes("unable to validate email address") || mensagem.includes("email address")){
-      return "Digite um e-mail valido.";
-    }
-
-    return error.message;
-  }
-
-  async function redirecionarSeSessaoAtiva(){
-    const { data } = await supabase.auth.getSession();
-
-    if(data.session){
-      window.location.href = 'portal.html';
-      return true;
-    }
-
-    return false;
-  }
-
-  async function fazerLogin(){
+  function fazerLogin(){
     limparMensagens();
-
-    const email = inputUsuario.value.trim();
+    const usuario = inputUsuario.value.trim().toLowerCase();
     const senha = inputSenha.value.trim();
 
-    if(!email || !senha){
-      mostrarErro("Preencha e-mail e senha.");
-      if(!email) inputUsuario.classList.add('error');
+    if(!usuario || !senha){
+      mostrarErro("Preencha usuário e senha.");
+      if(!usuario) inputUsuario.classList.add('error');
       if(!senha) inputSenha.classList.add('error');
       return;
     }
 
-    setBotoesCarregando(true, "Entrando...");
+    btnLogin.textContent = "Entrando...";
+    btnLogin.disabled = true;
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: senha
-    });
+    setTimeout(() => {
+      const usuariosFixos = {
+        lauro: 'DC@dist99',
+        marco: 'DC@dist99',
+        natan: 'DC@dist99',
+        luis: 'DC@dist99',
+        cesar: 'DC@dist99'
+      };
 
-    if(error){
-      mostrarErro(getMensagemErroAuth(error));
-      inputUsuario.classList.add('error');
-      inputSenha.classList.add('error');
-      setBotoesCarregando(false);
-      return;
-    }
-
-    if(data.user){
-      mostrarSucesso("Login realizado com sucesso!");
-      setTimeout(() => {
-        window.location.href = 'portal.html';
-      }, 1200);
-    } else {
-      mostrarErro("Não foi possível entrar.");
-      setBotoesCarregando(false);
-    }
-  }
-
-  async function verificarSessao(){
-    await redirecionarSeSessaoAtiva();
+      if(usuariosFixos[usuario] && usuariosFixos[usuario] === senha){
+        sessionStorage.setItem('portalUsuarioLogado', usuario);
+        mostrarSucesso(`Bem-vindo, ${usuario}!`);
+        setTimeout(() => {
+          window.location.href = 'portal.html';
+        }, 1200);
+      } else {
+        mostrarErro("Usuário ou senha incorretos.");
+        btnLogin.textContent = "Entrar";
+        btnLogin.disabled = false;
+        inputUsuario.classList.add('error');
+        inputSenha.classList.add('error');
+      }
+    }, 600);
   }
 
   document.addEventListener('keydown', e => {
@@ -190,8 +115,6 @@
       fazerLogin();
     }
   });
-
-  verificarSessao();
 </script>
 </body>
 </html>
