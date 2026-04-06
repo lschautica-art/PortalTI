@@ -173,32 +173,27 @@
   }
 
   async function criarConta(){
-    limparMensagens();
+  limparMensagens();
 
-    const email = inputUsuario.value.trim();
-    const senha = inputSenha.value.trim();
+  const email = inputUsuario.value.trim();
+  const senha = inputSenha.value.trim();
 
-    if(!email || !senha){
-      mostrarErro("Preencha e-mail e senha para criar a conta.");
-      if(!email) inputUsuario.classList.add('error');
-      if(!senha) inputSenha.classList.add('error');
-      return;
-    }
+  if(!email || !senha){
+    mostrarErro("Preencha e-mail e senha para criar a conta.");
+    return;
+  }
 
-    if(senha.length < 6){
-      mostrarErro("A senha deve ter pelo menos 6 caracteres.");
-      inputSenha.classList.add('error');
-      return;
-    }
+  if(senha.length < 6){
+    mostrarErro("A senha deve ter pelo menos 6 caracteres.");
+    return;
+  }
 
-    setBotoesCarregando(true, "Entrar", "Criando...");
+  setBotoesCarregando(true, "Entrar", "Criando...");
 
+  try {
     const { data, error } = await supabase.auth.signUp({
       email: email,
-      password: senha,
-      options: {
-        emailRedirectTo: `${window.location.origin}${window.location.pathname.replace(/index\.html$/i, "portal.html")}`
-      }
+      password: senha
     });
 
     if(error){
@@ -207,45 +202,15 @@
       return;
     }
 
-    const jaExistia = Array.isArray(data?.user?.identities) && data.user.identities.length === 0;
+    mostrarSucesso("Conta criada com sucesso!");
+    setBotoesCarregando(false);
 
-    if(jaExistia){
-      mostrarErro("Este e-mail ja esta cadastrado. Tente fazer login.");
-      setBotoesCarregando(false);
-      return;
-    }
-
-    if(data.session){
-      mostrarSucesso("Conta criada com sucesso! Redirecionando...");
-      setTimeout(() => {
-        window.location.href = 'portal.html';
-      }, 1200);
-      return;
-    }
-
-    const loginAutomatico = await supabase.auth.signInWithPassword({
-      email: email,
-      password: senha
-    });
-
-    if(!loginAutomatico.error && (loginAutomatico.data?.session || loginAutomatico.data?.user)){
-      mostrarSucesso("Conta criada com sucesso! Redirecionando...");
-      setTimeout(() => {
-        window.location.href = 'portal.html';
-      }, 1200);
-      return;
-    }
-
-    const houveSessao = await redirecionarSeSessaoAtiva();
-
-    if(houveSessao){
-      return;
-    }
-
-    mostrarSucesso("Conta criada, mas o Supabase pediu confirmacao por e-mail antes do acesso.");
+  } catch (erro) {
+    mostrarErro("Erro inesperado ao criar a conta.");
     setBotoesCarregando(false);
   }
-
+}
+  
   async function verificarSessao(){
     await redirecionarSeSessaoAtiva();
   }
