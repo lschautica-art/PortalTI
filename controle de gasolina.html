@@ -133,9 +133,7 @@
 
         <div class="field">
           <label for="combustivelFiltro">Tipo de combustivel</label>
-          <select id="combustivelFiltro">
-            <option value="" selected>Todos os tipos</option>
-          </select>
+          <select id="combustivelFiltro" multiple></select>
         </div>
 
         <div class="field">
@@ -312,11 +310,10 @@
       const exemplo = baseDados.find((item) => item.placa === placa);
       return `<option value="${placa}">${placa} - ${exemplo ? exemplo.veiculo : ''}</option>`;
     }).join('');
-    combustivelFiltro.innerHTML = '<option value="">Todos os tipos</option>' + combustiveis.map((tipo) => {
+    combustivelFiltro.innerHTML = combustiveis.map((tipo) => {
       const total = baseDados.filter((item) => item.combustivel === tipo).reduce((soma, item) => soma + item.valor, 0);
       return `<option value="${tipo}">${tipo} - ${formatarBRL(total)}</option>`;
     }).join('');
-    combustivelFiltro.value = '';
 
     if (meses.length) {
       mesInicio.value = meses[0];
@@ -429,14 +426,14 @@
     if (!baseDados.length) return;
     const supervisor = supervisorFiltro.value;
     const placas = obterSelecionados(placaFiltro);
-    const combustivel = combustivelFiltro.value;
+    const combustiveisSelecionados = obterSelecionados(combustivelFiltro);
     const inicio = mesInicio.value || '0000-00';
     const fim = mesFim.value || '9999-12';
 
     const filtrado = baseDados.filter((item) => {
       const okSupervisor = !supervisor || item.supervisor === supervisor;
       const okPlaca = !placas.length || placas.includes(item.placa);
-      const okCombustivel = !combustivel || item.combustivel === combustivel;
+      const okCombustivel = !combustiveisSelecionados.length || combustiveisSelecionados.includes(item.combustivel);
       const okPeriodo = item.mes >= inicio && item.mes <= fim;
       return okSupervisor && okPlaca && okCombustivel && okPeriodo;
     });
@@ -451,8 +448,8 @@
 
   function limparFiltros() {
     supervisorFiltro.value = '';
-    combustivelFiltro.value = '';
     Array.from(placaFiltro.options).forEach((option) => option.selected = false);
+    Array.from(combustivelFiltro.options).forEach((option) => option.selected = false);
     const meses = [...new Set(baseDados.map((item) => item.mes))].sort();
     if (meses.length) {
       mesInicio.value = meses[0];
