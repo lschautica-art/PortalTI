@@ -49,6 +49,7 @@
   .status, .hint { font-size: 0.9rem; line-height: 1.45; color: var(--muted); }
   .status { padding: 12px 14px; border-radius: 14px; background: #edf6fb; border: 1px solid #cfe2ee; margin-top: 14px; }
   .status.error { background: #fff1ef; border-color: #ffc9bf; color: #b14a33; }
+  .source-badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 10px 12px; border-radius: 999px; background: #f3f8fc; border: 1px solid var(--border); color: var(--primary); font-size: 0.88rem; font-weight: 700; }
   .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
   button { border: 0; border-radius: 14px; padding: 12px 14px; font-weight: 700; cursor: pointer; }
   .btn-primary { background: var(--secondary); color: #fff; }
@@ -111,6 +112,13 @@
           <input type="file" id="csvFile" accept=".csv">
         </div>
 
+        <div class="btn-row">
+          <button class="btn-secondary" id="usarPadrao">Usar CSV padrao</button>
+          <button class="btn-primary" id="aplicarFiltros">Aplicar</button>
+        </div>
+
+        <div class="source-badge" id="fonteAtual">Fonte atual: aguardando carga</div>
+
         <div class="field">
           <label for="supervisorFiltro">Supervisor</label>
           <select id="supervisorFiltro">
@@ -141,7 +149,6 @@
         </div>
 
         <div class="btn-row">
-          <button class="btn-primary" id="aplicarFiltros">Aplicar</button>
           <button class="btn-secondary" id="limparFiltros">Limpar</button>
         </div>
 
@@ -205,6 +212,7 @@
   const mesInicio = document.getElementById('mesInicio');
   const mesFim = document.getElementById('mesFim');
   const statusBox = document.getElementById('statusBox');
+  const fonteAtual = document.getElementById('fonteAtual');
   const cardTotal = document.getElementById('cardTotal');
   const cardSupervisores = document.getElementById('cardSupervisores');
   const cardPlacas = document.getElementById('cardPlacas');
@@ -216,6 +224,7 @@
   let chartMensal = null;
   let chartTipo = null;
   let chartPlaca = null;
+  const ARQUIVO_PADRAO = 'relatorio-analise-consumo-20260331_155302.csv';
 
   function formatarBRL(valor) {
     return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -224,6 +233,10 @@
   function atualizarStatus(texto, erro = false) {
     statusBox.textContent = texto;
     statusBox.classList.toggle('error', erro);
+  }
+
+  function atualizarFonteAtual(texto) {
+    fonteAtual.textContent = `Fonte atual: ${texto}`;
   }
 
   function indiceColunaExcel(letra) {
@@ -482,6 +495,7 @@
           return;
         }
 
+        atualizarFonteAtual(origem);
         atualizarStatus(`CSV carregado com sucesso a partir de ${origem}. ${baseDados.length} lancamentos encontrados. Limpeza automatica usando ${usaRelatorioBruto ? 'Y, F, G, AN e AR' : 'o modelo padrao'}.`);
         preencherFiltros();
         aplicarFiltros();
@@ -490,9 +504,24 @@
     });
   }
 
+  function carregarArquivoPadrao() {
+    atualizarStatus(`Carregando ${ARQUIVO_PADRAO}...`);
+    fetch(ARQUIVO_PADRAO)
+      .then((response) => {
+        if (!response.ok) throw new Error('arquivo nao encontrado');
+        return response.text();
+      })
+      .then((texto) => carregarTextoCSV(texto, `${ARQUIVO_PADRAO} (padrao)`))
+      .catch(() => {
+        atualizarFonteAtual('nenhuma');
+        atualizarStatus(`Nao foi possivel localizar ${ARQUIVO_PADRAO}.`, true);
+      });
+  }
+
   csvFileInput.addEventListener('change', (event) => {
     const arquivo = event.target.files[0];
     if (!arquivo) return;
+    atualizarStatus(`Carregando ${arquivo.name}...`);
     Papa.parse(arquivo, {
       header: true,
       skipEmptyLines: true,
@@ -505,18 +534,13 @@
     });
   });
 
+  document.getElementById('usarPadrao').addEventListener('click', carregarArquivoPadrao);
   document.getElementById('aplicarFiltros').addEventListener('click', aplicarFiltros);
   document.getElementById('limparFiltros').addEventListener('click', limparFiltros);
   supervisorFiltro.addEventListener('change', aplicarFiltros);
   combustivelFiltro.addEventListener('change', aplicarFiltros);
 
-  fetch('controle-gasolina.csv')
-    .then((response) => {
-      if (!response.ok) throw new Error('arquivo nao encontrado');
-      return response.text();
-    })
-    .then((texto) => carregarTextoCSV(texto, 'controle-gasolina.csv'))
-    .catch(() => atualizarStatus('HTML pronto. Selecione um CSV para iniciar a leitura.', false));
+  carregarArquivoPadrao();
 </script>
 </body>
 </html>
