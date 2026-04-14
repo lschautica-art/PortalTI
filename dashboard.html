@@ -53,9 +53,10 @@
   .theme-toggle:hover { background: #a82824; }
 
   /* Cards resumo */
-  .resumo-cards { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; justify-content: center; }
-  .card { background: var(--card-bg); box-shadow: 0 0 10px var(--card-shadow); padding: 15px 25px; border-radius: 8px; min-width: 140px; flex: 1 1 140px; text-align: center; }
-  .card strong { font-size: 1.6rem; display: block; margin-bottom: 5px; color: var(--primary); }
+  .resumo-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 15px; margin-bottom: 25px; }
+  .card { background: var(--card-bg); box-shadow: 0 0 10px var(--card-shadow); padding: 16px 20px; border-radius: 14px; min-width: 0; text-align: center; }
+  .card strong { font-size: clamp(1.35rem, 2.4vw, 1.9rem); display: block; margin-bottom: 6px; color: var(--primary); line-height: 1.15; overflow-wrap: anywhere; }
+  .card span { display: block; font-size: 0.95rem; line-height: 1.35; color: var(--text); overflow-wrap: anywhere; }
 
   /* Filtros */
   .filtros { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 20px; margin-bottom: 30px; }
@@ -83,8 +84,8 @@
   #notasContainer textarea::placeholder { color:#aaa; }
 
   /* Responsivo */
-  @media(max-width:900px){ body { display:block; } #sidebar{width:min(300px,82vw);height:100vh;transform:translateX(-100%);} body.sidebar-open #sidebar { transform:translateX(0); } body.sidebar-open .sidebar-backdrop { opacity:1; pointer-events:auto; } #mainContent{margin-left:0;width:100%;padding:18px 16px 24px;} .mobile-topbar { display:flex; } .theme-toggle { position:static; display:block; width:100%; margin:0 0 16px; } .grafico canvas{height:320px;} .resumo-cards{flex-direction:column;align-items:stretch;} .filtros { flex-direction:column; align-items:stretch; } select,input[type=month],#fornecedorFiltro { width:100%; min-width:0; } #pizzaContainer { height:420px; } }
-  @media(max-width:640px){ #mainContent { padding:14px; } .card { padding:14px 16px; } .grafico { margin-bottom:32px; } .grafico h3 { font-size:1.25rem; } .grafico canvas { height:260px; } #pizzaContainer { height:320px; margin-bottom:28px; } }
+  @media(max-width:900px){ body { display:block; } #sidebar{width:min(300px,82vw);height:100vh;transform:translateX(-100%);} body.sidebar-open #sidebar { transform:translateX(0); } body.sidebar-open .sidebar-backdrop { opacity:1; pointer-events:auto; } #mainContent{margin-left:0;width:100%;padding:18px 16px 24px;} .mobile-topbar { display:flex; } .theme-toggle { position:static; display:block; width:100%; margin:0 0 16px; } .grafico canvas{height:320px;} .resumo-cards{grid-template-columns:repeat(2, minmax(0, 1fr));} .filtros { flex-direction:column; align-items:stretch; } select,input[type=month],#fornecedorFiltro { width:100%; min-width:0; } #pizzaContainer { height:420px; } }
+  @media(max-width:640px){ #mainContent { padding:14px; } .resumo-cards { grid-template-columns:1fr; gap:12px; } .card { padding:14px 16px; } .card strong { font-size: clamp(1.2rem, 6vw, 1.6rem); } .card span { font-size: 0.9rem; } .grafico { margin-bottom:32px; } .grafico h3 { font-size:1.25rem; } .grafico canvas { height:260px; } #pizzaContainer { height:320px; margin-bottom:28px; } }
 </style>
 </head>
 <body>
