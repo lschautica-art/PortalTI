@@ -221,16 +221,23 @@
     `;
   }
 
+  function resolverEndpointRh() {
+    if (window.location.protocol === 'file:') {
+      return 'http://127.0.0.1:8000/api/news/rh';
+    }
+    return `/api/news/rh?_=${Date.now()}`;
+  }
+
   async function carregarNoticiasRh() {
     const status = document.getElementById('statusNoticiasRh');
     const lista = document.getElementById('listaNoticiasRh');
-    const endpoint = '/api/news/rh';
+    const endpoint = resolverEndpointRh();
 
     status.textContent = 'Carregando noticias de RH da ultima semana...';
     lista.innerHTML = '<div class="news-empty">Buscando noticias...</div>';
 
     try {
-      const resposta = await fetch(endpoint);
+      const resposta = await fetch(endpoint, { cache: 'no-store' });
       if (!resposta.ok) throw new Error(`Falha ${resposta.status}`);
       const dados = await resposta.json();
       const artigos = Array.isArray(dados.articles) ? dados.articles : [];
