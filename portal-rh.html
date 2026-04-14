@@ -34,7 +34,7 @@
   .mobile-topbar strong { color: var(--primary); font-size: 1rem; }
   .menu-toggle { border: 0; border-radius: 14px; background: var(--primary); color: white; padding: 12px 16px; font-weight: 700; cursor: pointer; box-shadow: 0 12px 24px rgba(7, 57, 84, 0.16); }
   .sidebar-backdrop { position: fixed; inset: 0; background: rgba(7, 23, 36, 0.45); opacity: 0; pointer-events: none; transition: opacity 0.28s ease; z-index: 20; }
-  .topbar, .hero, .summary-card, .module-card, .roadmap { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .topbar, .hero, .summary-card, .module-card, .roadmap, .news-shell { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
   .topbar { border-radius: 22px; padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 24px; }
   .brand { display: flex; align-items: center; gap: 16px; }
   .brand img { width: 82px; height: auto; }
@@ -59,9 +59,28 @@
   .roadmap { border-radius: 22px; padding: 24px; }
   .roadmap strong { display: block; color: var(--primary); margin-bottom: 8px; font-size: 1.1rem; }
   .roadmap p { margin: 0; color: var(--muted); line-height: 1.7; }
+  .news-shell { border-radius: 22px; padding: 24px; margin-bottom: 24px; }
+  .news-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 18px; }
+  .news-head h2 { margin: 0 0 8px; color: var(--primary); font-size: 1.5rem; }
+  .news-head p { margin: 0; color: var(--muted); line-height: 1.6; max-width: 760px; }
+  .news-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .news-btn { border: 0; border-radius: 999px; padding: 10px 16px; font-weight: 700; cursor: pointer; }
+  .news-btn.primary { background: var(--primary); color: white; }
+  .news-btn.secondary { background: #edf4f8; color: var(--primary); }
+  .news-status { margin-bottom: 18px; padding: 14px 16px; border-radius: 16px; background: #fdf6f5; color: var(--muted); border: 1px solid rgba(126, 29, 45, 0.08); line-height: 1.6; }
+  .news-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .news-card { display: flex; flex-direction: column; min-height: 100%; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; background: #fff; }
+  .news-card img { width: 100%; height: 180px; object-fit: cover; background: #efe1e5; }
+  .news-card-body { padding: 18px; display: grid; gap: 12px; }
+  .news-meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; color: var(--muted); font-size: 0.85rem; }
+  .news-source { font-weight: 700; color: #922f3a; }
+  .news-card h3 { margin: 0; font-size: 1.05rem; color: var(--primary); line-height: 1.4; }
+  .news-card p { margin: 0; color: var(--muted); line-height: 1.6; font-size: 0.93rem; }
+  .news-link { display: inline-flex; align-items: center; width: fit-content; text-decoration: none; color: white; background: var(--secondary); border-radius: 999px; padding: 10px 14px; font-weight: 700; }
+  .news-empty { padding: 24px; border: 1px dashed rgba(126, 29, 45, 0.16); border-radius: 18px; color: var(--muted); background: #fffaf9; }
   @media (max-width: 1100px) { .summary-grid, .modules-grid { grid-template-columns: 1fr; } }
-  @media (max-width: 980px) { body { display: block; } #sidebar { width: min(300px, 82vw); height: 100vh; transform: translateX(-100%); } body.sidebar-open #sidebar { transform: translateX(0); } body.sidebar-open .sidebar-backdrop { opacity: 1; pointer-events: auto; } #mainContent { width: 100%; margin-left: 0; padding: 18px; } .mobile-topbar { display: flex; } .topbar { display: block; } .tag { display: inline-block; margin-top: 14px; } }
-  @media (max-width: 640px) { #mainContent { padding: 14px; } .topbar, .hero, .summary-card, .module-card, .roadmap { border-radius: 18px; } .module-card { padding: 20px; } }
+  @media (max-width: 980px) { body { display: block; } #sidebar { width: min(300px, 82vw); height: 100vh; transform: translateX(-100%); } body.sidebar-open #sidebar { transform: translateX(0); } body.sidebar-open .sidebar-backdrop { opacity: 1; pointer-events: auto; } #mainContent { width: 100%; margin-left: 0; padding: 18px; } .mobile-topbar { display: flex; } .topbar, .news-head { display: block; } .tag { display: inline-block; margin-top: 14px; } .news-actions { margin-top: 14px; } .news-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { #mainContent { padding: 14px; } .topbar, .hero, .summary-card, .module-card, .roadmap, .news-shell { border-radius: 18px; } .module-card, .news-shell { padding: 20px; } .news-card img { height: 160px; } .news-meta { align-items: flex-start; flex-direction: column; } .news-btn { width: 100%; } }
 </style>
 </head>
 <body>
@@ -117,6 +136,20 @@
       <article class="summary-card"><span>Foco</span><strong>Equipe</strong></article>
     </section>
 
+    <section class="news-shell">
+      <div class="news-head">
+        <div>
+          <h2>Noticias da Semana</h2>
+          <p>Mostre noticias recentes sobre recursos humanos, gestao de pessoas e cultura organizacional para tornar a area mais atual e informativa.</p>
+        </div>
+        <div class="news-actions">
+          <button class="news-btn secondary" id="atualizarNoticiasRh" type="button">Atualizar noticias</button>
+        </div>
+      </div>
+      <div class="news-status" id="statusNoticiasRh">Aguardando o backend de noticias responder.</div>
+      <div class="news-grid" id="listaNoticiasRh"></div>
+    </section>
+
     <h2 class="section-title">Modulo Disponivel</h2>
     <section class="modules-grid">
       <article class="module-card">
@@ -157,6 +190,69 @@
       if (window.innerWidth > 980) fecharMenu();
     });
   }());
+
+  function formatarDataNoticia(dataIso) {
+    if (!dataIso) return 'Sem data';
+    const data = new Date(dataIso);
+    return Number.isNaN(data.getTime()) ? 'Sem data' : data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  function resumoNoticia(texto) {
+    const base = String(texto || '').trim();
+    if (!base) return 'Sem resumo disponivel para esta materia.';
+    return base.length > 160 ? `${base.slice(0, 157)}...` : base;
+  }
+
+  function montarCardNoticia(item) {
+    const imagem = item.image || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80';
+    return `
+      <article class="news-card">
+        <img src="${imagem}" alt="${item.title || 'Noticia'}" loading="lazy" referrerpolicy="no-referrer">
+        <div class="news-card-body">
+          <div class="news-meta">
+            <span class="news-source">${item.source?.name || 'Fonte externa'}</span>
+            <span>${formatarDataNoticia(item.publishedAt)}</span>
+          </div>
+          <h3>${item.title || 'Sem titulo'}</h3>
+          <p>${resumoNoticia(item.description)}</p>
+          <a class="news-link" href="${item.url || '#'}" target="_blank" rel="noopener noreferrer">Ler noticia</a>
+        </div>
+      </article>
+    `;
+  }
+
+  async function carregarNoticiasRh() {
+    const status = document.getElementById('statusNoticiasRh');
+    const lista = document.getElementById('listaNoticiasRh');
+    const endpoint = '/api/news/rh';
+
+    status.textContent = 'Carregando noticias de RH da ultima semana...';
+    lista.innerHTML = '<div class="news-empty">Buscando noticias...</div>';
+
+    try {
+      const resposta = await fetch(endpoint);
+      if (!resposta.ok) throw new Error(`Falha ${resposta.status}`);
+      const dados = await resposta.json();
+      const artigos = Array.isArray(dados.articles) ? dados.articles : [];
+
+      if (!artigos.length) {
+        status.textContent = 'Nenhuma noticia recente foi encontrada para RH nesta semana.';
+        lista.innerHTML = '<div class="news-empty">O backend respondeu sem artigos para o filtro atual. Tente novamente mais tarde.</div>';
+        return;
+      }
+
+      status.textContent = 'Noticias de RH atualizadas com sucesso.';
+      lista.innerHTML = artigos.map(montarCardNoticia).join('');
+    } catch (erro) {
+      status.textContent = 'Nao foi possivel carregar as noticias agora. Verifique se o backend Python esta rodando com GNEWS_API_KEY configurada.';
+      lista.innerHTML = '<div class="news-empty">A consulta falhou. Inicie o servidor Python e defina a chave da GNews no backend para liberar esta area.</div>';
+      console.error('Erro ao carregar noticias de RH:', erro);
+    }
+  }
+
+  document.getElementById('atualizarNoticiasRh').addEventListener('click', carregarNoticiasRh);
+
+  carregarNoticiasRh();
 </script>
 </body>
 </html>
