@@ -42,7 +42,10 @@
   const cardTicket = document.getElementById('cardTicket');
   const responsavelResumo = document.getElementById('responsavelResumo');
   const combustivelResumo = document.getElementById('combustivelResumo');
+  const postoResumo = document.getElementById('postoResumo');
+  const cidadeResumo = document.getElementById('cidadeResumo');
   const tabelaContainer = document.getElementById('tabelaContainer');
+  const MAPA_CACHE_KEY = 'portalTI_mapa_postos_v1';
 
   let baseDados = [];
   let dadosPrincipais = [];
@@ -53,13 +56,46 @@
   let ultimaOrigemPrincipal = '';
   let chartMensal = null;
   let chartTipo = null;
+  let chartUnidade = null;
   let chartPlaca = null;
+  let mapaPostos = null;
+  let mapaMarkersLayer = null;
   const STORAGE_BUCKET = 'portal-csvs';
   const STORAGE_PATH_MATRIZ = 'combustivel/matriz/latest.csv';
   const STORAGE_PATH_FILIAL = 'combustivel/filial/latest.csv';
 
   function formatarBRL(valor) {
     return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  function formatarNumero(valor, casas = 2) {
+    return Number(valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
+  }
+
+  function obterCacheMapa() {
+    try {
+      return JSON.parse(localStorage.getItem(MAPA_CACHE_KEY) || '{}');
+    } catch {
+      return {};
+    }
+  }
+
+  function salvarCacheMapa(cache) {
+    try {
+      localStorage.setItem(MAPA_CACHE_KEY, JSON.stringify(cache));
+    } catch {}
+  }
+
+  function normalizarLocalidade(valor) {
+    const texto = normalizarTexto(valor);
+    if (!texto) return 'Cidade nao informada';
+    return texto.split(' ').filter(Boolean).map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1)).join(' ');
+  }
+
+  function normalizarPosto(valor) {
+    const texto = normalizarTexto(valor);
+    if (!texto) return 'Posto nao informado';
+    return texto.split(' ').filter(Boolean).map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1)).join(' ');
   }
 
   function atualizarStatus(texto, erro = false) {
@@ -106,9 +142,11 @@
   async function baixarArquivoSupabase(path) {
     const supabase = obterClienteSupabase();
     if (!supabase) throw new Error('Cliente Supabase nao inicializado');
-    const { data, error } = await supabase.storage.from(STORAGE_BUCKET).download(path);
+    const { data, error } = await supabase.storage.from(STORAGE_BUCKET).createSignedUrl(path, 60);
     if (error) throw error;
-    return data.text();
+    const resposta = await fetch(data.signedUrl, { cache: 'no-store' });
+    if (!resposta.ok) throw new Error(`Falha ao baixar ${path}`);
+    return resposta.text();
   }
 
   function indiceColunaExcel(letra) {
@@ -256,6 +294,16 @@
     const colCombustivel = usaRelatorioBruto ? colunas[indiceColunaExcel('AN')] : (localizarColuna(colunas, ['Combustivel', 'Mercadoria']) || 'Combustivel');
     const colValor = usaRelatorioBruto ? colunas[indiceColunaExcel('AR')] : (localizarColuna(colunas, ['Valor', 'Valor total com desconto', 'Valor total']) || 'Valor');
     const colBase = usaRelatorioBruto ? colunas[indiceColunaExcel('D')] : localizarColuna(colunas, ['Base', 'Filial', 'Nome Filial', 'UF']);
+    const colLitros = localizarColuna(colunas, ['Qtd Mercadoria', 'Quantidade', 'Litros']);
+    const colValorLitro = localizarColuna(colunas, ['Valor Unit. Mercadoria', 'Valor unitario', 'Preco litro']);
+    const colPosto = localizarColuna(colunas, ['Nome EC', 'Posto', 'Estabelecimento']);
+    const colCidade = localizarColuna(colunas, ['Cidade EC', 'Cidade']);
+    const colCapacidade = localizarColuna(colunas, ['Capacidade Tanque']);
+    const colHodAnterior = localizarColuna(colunas, ['Hodômetro Anterior - Dig. Motorista', 'Hodometro Anterior - Dig. Motorista', 'Hodometro anterior']);
+    const colHodAtual = localizarColuna(colunas, ['Hodômetro Transação - Dig. Motorista', 'Hodometro Transacao - Dig. Motorista', 'Hodometro transacao']);
+    const colKmPercorrido = localizarColuna(colunas, ['Km/Hr Percorrido', 'Km Percorrido']);
+    const colCustoKm = localizarColuna(colunas, ['Custo Km/Hr Percorrido', 'Custo Km']);
+    const colMediaEfetiva = localizarColuna(colunas, ['Média Efetiva (Km/Hr)', 'Media Efetiva (Km/Hr)', 'Media Efetiva']);
 
     if (!colPlaca || !colVeiculo || !colData || !colCombustivel || !colValor) {
       return { dados: [], usaRelatorioBruto, valido: false };
@@ -268,6 +316,18 @@
       mes: converterData(linha[colData]),
       combustivel: String(linha[colCombustivel] || 'Nao informado').trim(),
       valor: converterValor(linha[colValor]),
+      litros: converterValor(linha[colLitros]),
+      valorLitro: converterValor(linha[colValorLitro]),
+      posto: normalizarPosto(linha[colPosto]),
+      cidade: normalizarLocalidade(linha[colCidade]),
+      uf: String(linha[localizarColuna(colunas, ['UF EC', 'UF'])] || '').trim().toUpperCase(),
+      endereco: String(linha[localizarColuna(colunas, ['Logradouro EC', 'Endereco', 'Logradouro'])] || '').trim(),
+      capacidadeTanque: converterValor(linha[colCapacidade]),
+      hodometroAnterior: converterValor(linha[colHodAnterior]),
+      hodometroAtual: converterValor(linha[colHodAtual]),
+      kmPercorrido: converterValor(linha[colKmPercorrido]),
+      custoKmInformado: converterValor(linha[colCustoKm]),
+      mediaEfetiva: converterValor(linha[colMediaEfetiva]),
       origemResponsavel: String(linha[colSupervisor] || '').trim() ? 'principal' : 'sem_nome',
       unidade: String(linha[colBase] || unidadePadrao || '').trim() || unidadePadrao || 'Nao identificada'
     })).filter((item) => item.placa && item.veiculo && item.mes && item.combustivel && item.valor >= 0);
@@ -281,6 +341,140 @@
 
   function destruirGrafico(instancia) {
     if (instancia) instancia.destroy();
+  }
+
+  function inicializarMapa() {
+    if (mapaPostos) return;
+    mapaPostos = L.map('mapaPostos').setView([-27.2423, -50.2189], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(mapaPostos);
+    mapaMarkersLayer = L.layerGroup().addTo(mapaPostos);
+    setTimeout(() => mapaPostos.invalidateSize(), 100);
+  }
+
+  function criarIconeMapa(tipo) {
+    return L.divIcon({
+      className: '',
+      html: `<div class="map-pin ${tipo}"></div>`,
+      iconSize: [18, 18],
+      iconAnchor: [9, 9],
+      popupAnchor: [0, -10]
+    });
+  }
+
+  function limparMapa() {
+    inicializarMapa();
+    mapaMarkersLayer.clearLayers();
+    mapaPostos.setView([-27.2423, -50.2189], 6);
+  }
+
+  async function geocodificarPosto(chave, consulta) {
+    const cache = obterCacheMapa();
+    if (cache[chave]) return cache[chave];
+    const consultas = [
+      `https://photon.komoot.io/api/?limit=1&q=${encodeURIComponent(consulta)}`,
+      `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(consulta)}`
+    ];
+
+    for (const url of consultas) {
+      try {
+        const resposta = await fetch(url, {
+          headers: { Accept: 'application/json' },
+          cache: 'no-store'
+        });
+        if (!resposta.ok) continue;
+        const resultados = await resposta.json();
+
+        let coordenadas = null;
+        if (url.includes('photon') && resultados?.features?.length) {
+          coordenadas = {
+            lat: Number(resultados.features[0].geometry.coordinates[1]),
+            lon: Number(resultados.features[0].geometry.coordinates[0])
+          };
+        }
+        if (url.includes('nominatim') && Array.isArray(resultados) && resultados.length) {
+          coordenadas = {
+            lat: Number(resultados[0].lat),
+            lon: Number(resultados[0].lon)
+          };
+        }
+
+        if (coordenadas && Number.isFinite(coordenadas.lat) && Number.isFinite(coordenadas.lon)) {
+          cache[chave] = coordenadas;
+          salvarCacheMapa(cache);
+          return coordenadas;
+        }
+      } catch {}
+    }
+
+    return null;
+  }
+
+  async function atualizarMapaPostos(dados) {
+    inicializarMapa();
+    mapaMarkersLayer.clearLayers();
+    if (!dados.length) {
+      mapaPostos.setView([-27.2423, -50.2189], 6);
+      return;
+    }
+
+    const agrupado = {};
+    dados.forEach((item) => {
+      const chave = `${item.posto}|||${item.cidade}|||${item.uf}|||${item.endereco}`;
+      if (!agrupado[chave]) agrupado[chave] = {
+        posto: item.posto,
+        cidade: item.cidade,
+        uf: item.uf,
+        endereco: item.endereco,
+        unidade: new Set(),
+        responsaveis: new Set(),
+        total: 0,
+        lancamentos: 0
+      };
+      agrupado[chave].unidade.add(item.unidade);
+      agrupado[chave].responsaveis.add(item.supervisor);
+      agrupado[chave].total += item.valor;
+      agrupado[chave].lancamentos += 1;
+    });
+
+    const postos = Object.values(agrupado).sort((a, b) => b.total - a.total).slice(0, 40);
+    const bounds = [];
+
+    for (const posto of postos) {
+      const consulta = [posto.posto, posto.endereco, posto.cidade, posto.uf, 'Brasil'].filter(Boolean).join(', ');
+      const chaveCache = normalizarTexto(consulta);
+      try {
+        const coords = await geocodificarPosto(chaveCache, consulta);
+        if (!coords) continue;
+        const tipoMarcador = posto.unidade.size > 1
+          ? 'misto'
+          : Array.from(posto.unidade)[0]?.toLowerCase().includes('filial')
+            ? 'filial'
+            : 'matriz';
+        const marker = L.marker([coords.lat, coords.lon], { icon: criarIconeMapa(tipoMarcador) }).addTo(mapaMarkersLayer);
+        marker.bindPopup(`
+          <div class="map-popup">
+            <strong>${posto.posto}</strong>
+            <span>${posto.cidade}${posto.uf ? ` - ${posto.uf}` : ''}</span>
+            <span>${posto.endereco || 'Endereco nao informado'}</span>
+            <span><b>Unidades:</b> ${Array.from(posto.unidade).join(', ')}</span>
+            <span><b>Responsaveis:</b> ${Array.from(posto.responsaveis).slice(0, 3).join(', ')}${posto.responsaveis.size > 3 ? '...' : ''}</span>
+            <span><b>Total gasto:</b> ${formatarBRL(posto.total)}</span>
+            <span><b>Lancamentos:</b> ${posto.lancamentos}</span>
+          </div>
+        `);
+        bounds.push([coords.lat, coords.lon]);
+      } catch {}
+    }
+
+    if (bounds.length) {
+      mapaPostos.fitBounds(bounds, { padding: [30, 30] });
+      setTimeout(() => mapaPostos.invalidateSize(), 50);
+    } else {
+      mapaPostos.setView([-27.2423, -50.2189], 6);
+      setTimeout(() => mapaPostos.invalidateSize(), 50);
+    }
   }
 
   function opcoesBaseGrafico() {
@@ -384,6 +578,33 @@
     });
   }
 
+  function atualizarGraficoUnidade(dados) {
+    const agrupado = {};
+    dados.forEach((item) => {
+      agrupado[item.unidade] = (agrupado[item.unidade] || 0) + item.valor;
+    });
+    const linhas = Object.entries(agrupado).sort((a, b) => b[1] - a[1]);
+    destruirGrafico(chartUnidade);
+    chartUnidade = new Chart(document.getElementById('graficoUnidade').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: linhas.map(([nome]) => nome),
+        datasets: [{
+          data: linhas.map(([, valor]) => valor),
+          backgroundColor: ['#0a5678', '#fb3f3a', '#17a673', '#ffc38f'],
+          borderRadius: 10
+        }]
+      },
+      options: {
+        ...opcoesBaseGrafico(),
+        plugins: {
+          ...opcoesBaseGrafico().plugins,
+          legend: { display: false }
+        }
+      }
+    });
+  }
+
   function atualizarGraficoPlaca(dados) {
     const agrupado = {};
     dados.forEach((item) => {
@@ -438,6 +659,25 @@
     responsavelResumo.innerHTML = `<div class="table-scroll"><table class="responsive-table"><thead><tr><th>Responsavel</th><th>Unidade</th><th>Total gasto</th><th>Placas</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map((linha) => `<tr><td data-label="Responsavel">${linha.responsavel}</td><td data-label="Unidade">${linha.unidade}</td><td data-label="Total gasto">${formatarBRL(linha.total)}</td><td data-label="Placas">${linha.placas.size}</td><td data-label="Lancamentos">${linha.lancamentos}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
+  function atualizarResumoLocal(dados, elemento, tipo) {
+    if (!dados.length) {
+      elemento.className = 'empty';
+      elemento.textContent = `Importe um CSV para visualizar o resumo por ${tipo}.`;
+      return;
+    }
+    const agrupado = {};
+    dados.forEach((item) => {
+      const chave = tipo === 'posto' ? item.posto : item.cidade;
+      if (!agrupado[chave]) agrupado[chave] = { nome: chave, total: 0, litros: 0, lancamentos: 0 };
+      agrupado[chave].total += item.valor;
+      agrupado[chave].litros += item.litros || 0;
+      agrupado[chave].lancamentos += 1;
+    });
+    const linhas = Object.values(agrupado).sort((a, b) => b.total - a.total).slice(0, 20);
+    elemento.className = '';
+    elemento.innerHTML = `<div class="table-scroll"><table class="responsive-table"><thead><tr><th>${tipo === 'posto' ? 'Posto' : 'Cidade'}</th><th>Total</th><th>Litros</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map((linha) => `<tr><td data-label="${tipo === 'posto' ? 'Posto' : 'Cidade'}">${linha.nome}</td><td data-label="Total">${formatarBRL(linha.total)}</td><td data-label="Litros">${formatarNumero(linha.litros)} L</td><td data-label="Lancamentos">${linha.lancamentos}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+
   function atualizarTabela(dados) {
     if (!dados.length) {
       tabelaContainer.className = 'empty';
@@ -447,14 +687,16 @@
     const resumo = {};
     dados.forEach((item) => {
       const chave = `${item.unidade}|||${item.supervisor}|||${item.placa}|||${item.veiculo}`;
-      if (!resumo[chave]) resumo[chave] = { supervisor: item.supervisor, unidade: item.unidade, placa: item.placa, veiculo: item.veiculo, combustivel: item.combustivel, total: 0, lancamentos: 0 };
+      if (!resumo[chave]) resumo[chave] = { supervisor: item.supervisor, unidade: item.unidade, placa: item.placa, veiculo: item.veiculo, combustivel: item.combustivel, total: 0, litros: 0, km: 0, lancamentos: 0 };
       if (resumo[chave].combustivel !== item.combustivel) resumo[chave].combustivel = 'Multiplos';
       resumo[chave].total += item.valor;
+      resumo[chave].litros += item.litros || 0;
+      resumo[chave].km += item.kmPercorrido || 0;
       resumo[chave].lancamentos += 1;
     });
     const linhas = Object.values(resumo).sort((a, b) => b.total - a.total);
     tabelaContainer.className = '';
-    tabelaContainer.innerHTML = `<div class="table-scroll"><table class="responsive-table"><thead><tr><th>Unidade</th><th>Responsavel</th><th>Placa</th><th>Veiculo</th><th>Combustivel</th><th>Total</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map((linha) => `<tr><td data-label="Unidade">${linha.unidade}</td><td data-label="Responsavel">${linha.supervisor}</td><td data-label="Placa">${linha.placa}</td><td data-label="Veiculo">${linha.veiculo}</td><td data-label="Combustivel">${linha.combustivel}</td><td data-label="Total">${formatarBRL(linha.total)}</td><td data-label="Lancamentos">${linha.lancamentos}</td></tr>`).join('')}</tbody></table></div>`;
+    tabelaContainer.innerHTML = `<div class="table-scroll"><table class="responsive-table"><thead><tr><th>Unidade</th><th>Responsavel</th><th>Placa</th><th>Veiculo</th><th>Combustivel</th><th>Total</th><th>Litros</th><th>Km</th><th>Km/l</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map((linha) => `<tr><td data-label="Unidade">${linha.unidade}</td><td data-label="Responsavel">${linha.supervisor}</td><td data-label="Placa">${linha.placa}</td><td data-label="Veiculo">${linha.veiculo}</td><td data-label="Combustivel">${linha.combustivel}</td><td data-label="Total">${formatarBRL(linha.total)}</td><td data-label="Litros">${formatarNumero(linha.litros)} L</td><td data-label="Km">${formatarNumero(linha.km, 0)}</td><td data-label="Km/l">${linha.litros > 0 && linha.km > 0 ? formatarNumero(linha.km / linha.litros) : '0,00'}</td><td data-label="Lancamentos">${linha.lancamentos}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
   function resumirVinculoCadastro(dados) {
@@ -485,10 +727,14 @@
     atualizarCards(filtrado);
     atualizarGraficoMensal(filtrado);
     atualizarGraficoTipo(filtrado);
+    atualizarGraficoUnidade(filtrado);
     atualizarGraficoPlaca(filtrado);
     atualizarResumoResponsavel(filtrado);
     atualizarResumoCombustivel(filtrado);
+    atualizarResumoLocal(filtrado, postoResumo, 'posto');
+    atualizarResumoLocal(filtrado, cidadeResumo, 'cidade');
     atualizarTabela(filtrado);
+    atualizarMapaPostos(filtrado);
   }
 
   function limparTela() {
@@ -512,16 +758,23 @@
     atualizarCards([]);
     destruirGrafico(chartMensal);
     destruirGrafico(chartTipo);
+    destruirGrafico(chartUnidade);
     destruirGrafico(chartPlaca);
     chartMensal = null;
     chartTipo = null;
+    chartUnidade = null;
     chartPlaca = null;
     document.getElementById('graficoPlaca').parentElement.style.height = '420px';
+    limparMapa();
 
     responsavelResumo.className = 'empty';
     responsavelResumo.textContent = 'Importe os CSVs para visualizar o total por responsavel.';
     combustivelResumo.className = 'empty';
     combustivelResumo.textContent = 'Importe um CSV para visualizar o resumo por tipo de combustivel.';
+    postoResumo.className = 'empty';
+    postoResumo.textContent = 'Importe um CSV para visualizar o resumo por posto.';
+    cidadeResumo.className = 'empty';
+    cidadeResumo.textContent = 'Importe um CSV para visualizar o resumo por cidade.';
     tabelaContainer.className = 'empty';
     tabelaContainer.textContent = 'Importe um CSV para visualizar o resumo por placa e veiculo.';
 
@@ -659,9 +912,9 @@
         atualizarStatusSalvamento(`Upload concluido. ${arquivo.name} foi salvo no Supabase como CSV atual da matriz.`, 'success');
         carregarTextoCSV(texto, `${arquivo.name} (enviado ao Supabase)`);
       })
-      .catch(() => {
+      .catch((error) => {
         atualizarStatus('Nao foi possivel importar o arquivo selecionado.', true);
-        atualizarStatusSalvamento(`Falha ao salvar ${arquivo.name} no Supabase.`, 'error');
+        atualizarStatusSalvamento(`Falha ao salvar ${arquivo.name} no Supabase. ${error.message || ''}`.trim(), 'error');
       });
   });
 
@@ -675,15 +928,64 @@
         atualizarStatusSalvamento(`Upload concluido. ${arquivo.name} foi salvo no Supabase como CSV atual da filial.`, 'success');
         carregarCadastroTexto(texto, `${arquivo.name} (enviado ao Supabase)`);
       })
-      .catch(() => {
+      .catch((error) => {
         atualizarStatusCadastro('Nao foi possivel importar o CSV da filial.', true);
-        atualizarStatusSalvamento(`Falha ao salvar ${arquivo.name} no Supabase.`, 'error');
+        atualizarStatusSalvamento(`Falha ao salvar ${arquivo.name} no Supabase. ${error.message || ''}`.trim(), 'error');
       });
   });
 
   document.getElementById('usarPadrao').addEventListener('click', carregarArquivoPadrao);
   document.getElementById('aplicarFiltros').addEventListener('click', aplicarFiltros);
   document.getElementById('limparFiltros').addEventListener('click', limparTela);
+  document.getElementById('exportarFiltrado').addEventListener('click', () => {
+    if (!baseDados.length) {
+      atualizarStatusSalvamento('Nao ha dados carregados para exportar.', 'error');
+      return;
+    }
+    const unidade = unidadeFiltro.value;
+    const supervisor = supervisorFiltro.value;
+    const placas = obterSelecionados(placaFiltro);
+    const combustiveisSelecionados = obterSelecionados(combustivelFiltro);
+    const inicio = mesInicio.value || '0000-00';
+    const fim = mesFim.value || '9999-12';
+    const filtrado = baseDados.filter((item) => {
+      const okUnidade = !unidade || item.unidade === unidade;
+      const okSupervisor = !supervisor || item.supervisor === supervisor;
+      const okPlaca = !placas.length || placas.includes(item.placa);
+      const okCombustivel = !combustiveisSelecionados.length || combustiveisSelecionados.includes(item.combustivel);
+      const okPeriodo = item.mes >= inicio && item.mes <= fim;
+      return okUnidade && okSupervisor && okPlaca && okCombustivel && okPeriodo;
+    }).map((item) => ({
+      unidade: item.unidade,
+      responsavel: item.supervisor,
+      placa: item.placa,
+      veiculo: item.veiculo,
+      mes: item.mes,
+      combustivel: item.combustivel,
+      valor: item.valor,
+      litros: item.litros,
+      valor_litro: item.valorLitro,
+      posto: item.posto,
+      cidade: item.cidade,
+      capacidade_tanque: item.capacidadeTanque,
+      hodometro_anterior: item.hodometroAnterior,
+      hodometro_atual: item.hodometroAtual,
+      km_percorrido: item.kmPercorrido,
+      custo_km_informado: item.custoKmInformado,
+      media_efetiva: item.mediaEfetiva
+    }));
+    const csv = Papa.unparse(filtrado);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `controle-gasolina-filtrado-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    atualizarStatusSalvamento(`Exportacao concluida com ${filtrado.length} linhas filtradas.`, 'success');
+  });
   unidadeFiltro.addEventListener('change', aplicarFiltros);
   supervisorFiltro.addEventListener('change', aplicarFiltros);
   placaFiltro.addEventListener('change', aplicarFiltros);
@@ -691,5 +993,17 @@
   mesInicio.addEventListener('change', aplicarFiltros);
   mesFim.addEventListener('change', aplicarFiltros);
 
-  carregarArquivoPadrao();
+  async function iniciarPagina() {
+    try {
+      const sessao = await window.portalAuth?.obterSessaoAtual?.();
+      if (!sessao) return;
+    } catch (error) {
+      atualizarStatusSalvamento('Nao foi possivel validar a sessao antes de carregar os CSVs.', 'error');
+      return;
+    }
+    inicializarMapa();
+    carregarArquivoPadrao();
+  }
+
+  iniciarPagina();
 
