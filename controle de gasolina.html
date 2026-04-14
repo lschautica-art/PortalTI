@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle de Combustível</title>
+<title>Controle de Combustivel</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
@@ -50,7 +50,7 @@
   .field label { display: block; margin-bottom: 8px; font-weight: 600; }
   .field input, .field select { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 0.97rem; }
   .field select[multiple] { min-height: 150px; }
-  #placaFiltro, #combustívelFiltro { font-weight: 600; background: #f3f8fc; }
+  #placaFiltro, #combustivelFiltro { font-weight: 600; background: #f3f8fc; }
   .field small { display: block; margin-top: 6px; color: var(--muted); font-size: 0.82rem; }
   .status, .hint { font-size: 0.9rem; line-height: 1.45; color: var(--muted); }
   .status { padding: 12px 14px; border-radius: 14px; background: #edf6fb; border: 1px solid #cfe2ee; margin-top: 14px; }
@@ -135,14 +135,14 @@
     <h2>Menu</h2>
     <ul>
       <li><a href="portal.html">Portal Inicial</a></li>
-      <li class="menu-label"><span>Área TI</span></li>
-      <li><a href="portal-ti.html">Tecnologia da Informação</a></li>
+      <li class="menu-label"><span>Area TI</span></li>
+      <li><a href="portal-ti.html">Tecnologia da Informacao</a></li>
       <li><a href="dashboard.html">Dashboard TI</a></li>
       <li><a href="dashboard-2026.html">Dashboard TI - 2026</a></li>
       <li><a href="comparativo-anual-2025.html">Comparativo Anual</a></li>
-      <li class="menu-label"><span>Área RH</span></li>
+      <li class="menu-label"><span>Area RH</span></li>
       <li><a href="portal-rh.html">RH</a></li>
-      <li><a href="Controle de gasolina.html" class="active">Controle de combustível</a></li>
+      <li><a href="Controle de gasolina.html" class="active">Controle de combustivel</a></li>
       <li><a href="index.html">Sair</a></li>
     </ul>
   </aside>
@@ -150,11 +150,11 @@
   <main id="mainContent">
     <div class="mobile-topbar">
       <button class="menu-toggle" id="menuToggle" type="button">Menu</button>
-      <strong>Controle de Combustível</strong>
+      <strong>Controle de Combustivel</strong>
     </div>
     <section class="hero">
-      <h1>Controle de Combustível</h1>
-      <p>Ao importar o relatório bruto do portal, o sistema limpa automáticamente os dados usando as colunas fixas que voce definiu: <strong>Y</strong> para data, <strong>F</strong> para placa, <strong>G</strong> para modelo do veículo, <strong>AN</strong> para tipo de combustível e <strong>AR</strong> para valor total com desconto.</p>
+      <h1>Controle de Combustivel</h1>
+      <p>Ao importar o relatorio bruto do portal, o sistema limpa automaticamente os dados usando as colunas fixas que voce definiu: <strong>Y</strong> para data, <strong>F</strong> para placa, <strong>G</strong> para modelo do veiculo, <strong>AN</strong> para tipo de combustivel e <strong>AR</strong> para valor total com desconto.</p>
     </section>
 
     <div class="layout">
@@ -162,12 +162,12 @@
         <h2>Importacao e filtros</h2>
 
         <div class="field">
-          <label for="csvFile">CSV de combustível</label>
+          <label for="csvFile">CSV de combustivel</label>
           <input type="file" id="csvFile" accept=".csv">
         </div>
 
         <div class="btn-row">
-          <button class="btn-secondary" id="usarPadrao">Usar CSV padrão</button>
+          <button class="btn-secondary" id="usarPadrao">Usar CSV padrao</button>
           <button class="btn-primary" id="aplicarFiltros">Aplicar</button>
         </div>
 
@@ -187,8 +187,8 @@
         </div>
 
         <div class="field">
-          <label for="combustívelFiltro">Tipo de combustível</label>
-          <select id="combustívelFiltro" multiple></select>
+          <label for="combustivelFiltro">Tipo de combustivel</label>
+          <select id="combustivelFiltro" multiple></select>
           <small>Voce pode selecionar varios tipos ao mesmo tempo.</small>
         </div>
 
@@ -206,14 +206,14 @@
           <button class="btn-secondary" id="limparFiltros">Limpar</button>
         </div>
 
-        <div class="status" id="statusBox">Aguardando CSV. A limpeza automática prioriza Y, F, G, AN e AR no relatório bruto.</div>
+        <div class="status" id="statusBox">Aguardando CSV. A limpeza automatica prioriza Y, F, G, AN e AR no relatorio bruto.</div>
 
         <p class="hint">
-          Colunas usadas automáticamente no relatório bruto:
+          Colunas usadas automaticamente no relatorio bruto:
           <br>Y = Data
           <br>F = Placa
-          <br>G = Veículo
-          <br>AN = Combustível
+          <br>G = Veiculo
+          <br>AN = Combustivel
           <br>AR = Valor com desconto
         </p>
       </aside>
@@ -233,24 +233,24 @@
           </article>
 
           <article class="chart-card">
-            <h3>Gasto por tipo de combustível</h3>
+            <h3>Gasto por tipo de combustivel</h3>
             <div class="chart-wrap ranking"><canvas id="graficoTipo"></canvas></div>
           </article>
         </section>
 
         <section class="table-card">
-          <h3>Ranking por placa e veículo</h3>
+          <h3>Ranking por placa e veiculo</h3>
           <div class="chart-wrap ranking"><canvas id="graficoPlaca"></canvas></div>
         </section>
 
         <section class="table-card">
-          <h3>Resumo por tipo de combustível</h3>
-          <div id="combustívelResumo" class="empty">Importe um CSV para visualizar o resumo por tipo de combustível.</div>
+          <h3>Resumo por tipo de combustivel</h3>
+          <div id="combustivelResumo" class="empty">Importe um CSV para visualizar o resumo por tipo de combustivel.</div>
         </section>
 
         <section class="table-card">
-          <h3>Detalhamento por placa e veículo</h3>
-          <div id="tabelaContainer" class="empty">Importe um CSV para visualizar o resumo por placa e veículo.</div>
+          <h3>Detalhamento por placa e veiculo</h3>
+          <div id="tabelaContainer" class="empty">Importe um CSV para visualizar o resumo por placa e veiculo.</div>
         </section>
       </main>
     </div>
@@ -284,7 +284,7 @@
   const csvFileInput = document.getElementById('csvFile');
   const supervisorFiltro = document.getElementById('supervisorFiltro');
   const placaFiltro = document.getElementById('placaFiltro');
-  const combustívelFiltro = document.getElementById('combustívelFiltro');
+  const combustivelFiltro = document.getElementById('combustivelFiltro');
   const mesInicio = document.getElementById('mesInicio');
   const mesFim = document.getElementById('mesFim');
   const statusBox = document.getElementById('statusBox');
@@ -293,14 +293,14 @@
   const cardSupervisores = document.getElementById('cardSupervisores');
   const cardPlacas = document.getElementById('cardPlacas');
   const cardTicket = document.getElementById('cardTicket');
-  const combustívelResumo = document.getElementById('combustívelResumo');
+  const combustivelResumo = document.getElementById('combustivelResumo');
   const tabelaContainer = document.getElementById('tabelaContainer');
 
   let baseDados = [];
   let chartMensal = null;
   let chartTipo = null;
   let chartPlaca = null;
-  const ARQUIVO_PADRAO = 'relatório-analise-consumo-20260331_155302.csv';
+  const ARQUIVO_PADRAO = 'relatorio-analise-consumo-20260331_155302.csv';
 
   function formatarBRL(valor) {
     return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -380,16 +380,16 @@
   function preencherFiltros() {
     const supervisores = [...new Set(baseDados.map((item) => item.supervisor))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
     const placas = [...new Set(baseDados.map((item) => item.placa))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-    const combustiveis = [...new Set(baseDados.map((item) => item.combustível))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    const combustiveis = [...new Set(baseDados.map((item) => item.combustivel))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
     const meses = [...new Set(baseDados.map((item) => item.mes))].sort();
 
     supervisorFiltro.innerHTML = '<option value="">Todos os supervisores</option>' + supervisores.map((item) => `<option value="${item}">${item}</option>`).join('');
     placaFiltro.innerHTML = placas.map((placa) => {
       const exemplo = baseDados.find((item) => item.placa === placa);
-      return `<option value="${placa}">${placa} - ${exemplo ? exemplo.veículo : ''}</option>`;
+      return `<option value="${placa}">${placa} - ${exemplo ? exemplo.veiculo : ''}</option>`;
     }).join('');
-    combustívelFiltro.innerHTML = combustiveis.map((tipo) => {
-      const total = baseDados.filter((item) => item.combustível === tipo).reduce((soma, item) => soma + item.valor, 0);
+    combustivelFiltro.innerHTML = combustiveis.map((tipo) => {
+      const total = baseDados.filter((item) => item.combustivel === tipo).reduce((soma, item) => soma + item.valor, 0);
       return `<option value="${tipo}">${tipo} - ${formatarBRL(total)}</option>`;
     }).join('');
 
@@ -436,7 +436,7 @@
 
   function atualizarGraficoTipo(dados) {
     const agrupado = {};
-    dados.forEach((item) => { agrupado[item.combustível] = (agrupado[item.combustível] || 0) + item.valor; });
+    dados.forEach((item) => { agrupado[item.combustivel] = (agrupado[item.combustivel] || 0) + item.valor; });
     const ranking = Object.entries(agrupado).sort((a, b) => b[1] - a[1]);
     destruirGrafico(chartTipo);
     chartTipo = new Chart(document.getElementById('graficoTipo').getContext('2d'), {
@@ -449,7 +449,7 @@
   function atualizarGraficoPlaca(dados) {
     const agrupado = {};
     dados.forEach((item) => {
-      const chave = `${item.placa} - ${item.veículo}`;
+      const chave = `${item.placa} - ${item.veiculo}`;
       agrupado[chave] = (agrupado[chave] || 0) + item.valor;
     });
     const ranking = Object.entries(agrupado).sort((a, b) => b[1] - a[1]);
@@ -463,22 +463,22 @@
     });
   }
 
-  function atualizarResumoCombustível(dados) {
+  function atualizarResumoCombustivel(dados) {
     if (!dados.length) {
-      combustívelResumo.className = 'empty';
-      combustívelResumo.textContent = 'Nenhum dado encontrado para o tipo de combustível selecionado.';
+      combustivelResumo.className = 'empty';
+      combustivelResumo.textContent = 'Nenhum dado encontrado para o tipo de combustivel selecionado.';
       return;
     }
     const agrupado = {};
     dados.forEach((item) => {
-      if (!agrupado[item.combustível]) agrupado[item.combustível] = { total: 0, placas: new Set(), lancamentos: 0 };
-      agrupado[item.combustível].total += item.valor;
-      agrupado[item.combustível].placas.add(item.placa);
-      agrupado[item.combustível].lancamentos += 1;
+      if (!agrupado[item.combustivel]) agrupado[item.combustivel] = { total: 0, placas: new Set(), lancamentos: 0 };
+      agrupado[item.combustivel].total += item.valor;
+      agrupado[item.combustivel].placas.add(item.placa);
+      agrupado[item.combustivel].lancamentos += 1;
     });
     const linhas = Object.entries(agrupado).sort((a, b) => b[1].total - a[1].total);
-    combustívelResumo.className = '';
-    combustívelResumo.innerHTML = `<div class="table-scroll"><table class="responsive-table"><thead><tr><th>Combustível</th><th>Total</th><th>Placas</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map(([tipo, info]) => `<tr><td data-label="Combustível">${tipo}</td><td data-label="Total">${formatarBRL(info.total)}</td><td data-label="Placas">${info.placas.size}</td><td data-label="Lancamentos">${info.lancamentos}</td></tr>`).join('')}</tbody></table></div>`;
+    combustivelResumo.className = '';
+    combustivelResumo.innerHTML = `<div class="table-scroll"><table class="responsive-table"><thead><tr><th>Combustivel</th><th>Total</th><th>Placas</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map(([tipo, info]) => `<tr><td data-label="Combustivel">${tipo}</td><td data-label="Total">${formatarBRL(info.total)}</td><td data-label="Placas">${info.placas.size}</td><td data-label="Lancamentos">${info.lancamentos}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
   function atualizarTabela(dados) {
@@ -489,45 +489,45 @@
     }
     const resumo = {};
     dados.forEach((item) => {
-      const chave = `${item.supervisor}|||${item.placa}|||${item.veículo}`;
-      if (!resumo[chave]) resumo[chave] = { supervisor: item.supervisor, placa: item.placa, veículo: item.veículo, combustível: item.combustível, total: 0, lancamentos: 0 };
-      if (resumo[chave].combustível !== item.combustível) resumo[chave].combustível = 'Multiplos';
+      const chave = `${item.supervisor}|||${item.placa}|||${item.veiculo}`;
+      if (!resumo[chave]) resumo[chave] = { supervisor: item.supervisor, placa: item.placa, veiculo: item.veiculo, combustivel: item.combustivel, total: 0, lancamentos: 0 };
+      if (resumo[chave].combustivel !== item.combustivel) resumo[chave].combustivel = 'Multiplos';
       resumo[chave].total += item.valor;
       resumo[chave].lancamentos += 1;
     });
     const linhas = Object.values(resumo).sort((a, b) => b.total - a.total);
     tabelaContainer.className = '';
-    tabelaContainer.innerHTML = `<div class="table-scroll"><table class="responsive-table"><thead><tr><th>Supervisor</th><th>Placa</th><th>Veículo</th><th>Combustível</th><th>Total</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map((linha) => `<tr><td data-label="Supervisor">${linha.supervisor}</td><td data-label="Placa">${linha.placa}</td><td data-label="Veículo">${linha.veículo}</td><td data-label="Combustível">${linha.combustível}</td><td data-label="Total">${formatarBRL(linha.total)}</td><td data-label="Lancamentos">${linha.lancamentos}</td></tr>`).join('')}</tbody></table></div>`;
+    tabelaContainer.innerHTML = `<div class="table-scroll"><table class="responsive-table"><thead><tr><th>Supervisor</th><th>Placa</th><th>Veiculo</th><th>Combustivel</th><th>Total</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map((linha) => `<tr><td data-label="Supervisor">${linha.supervisor}</td><td data-label="Placa">${linha.placa}</td><td data-label="Veiculo">${linha.veiculo}</td><td data-label="Combustivel">${linha.combustivel}</td><td data-label="Total">${formatarBRL(linha.total)}</td><td data-label="Lancamentos">${linha.lancamentos}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
   function aplicarFiltros() {
     if (!baseDados.length) return;
     const supervisor = supervisorFiltro.value;
     const placas = obterSelecionados(placaFiltro);
-    const combustiveisSelecionados = obterSelecionados(combustívelFiltro);
+    const combustiveisSelecionados = obterSelecionados(combustivelFiltro);
     const inicio = mesInicio.value || '0000-00';
     const fim = mesFim.value || '9999-12';
 
     const filtrado = baseDados.filter((item) => {
       const okSupervisor = !supervisor || item.supervisor === supervisor;
       const okPlaca = !placas.length || placas.includes(item.placa);
-      const okCombustível = !combustiveisSelecionados.length || combustiveisSelecionados.includes(item.combustível);
+      const okCombustivel = !combustiveisSelecionados.length || combustiveisSelecionados.includes(item.combustivel);
       const okPeriodo = item.mes >= inicio && item.mes <= fim;
-      return okSupervisor && okPlaca && okCombustível && okPeriodo;
+      return okSupervisor && okPlaca && okCombustivel && okPeriodo;
     });
 
     atualizarCards(filtrado);
     atualizarGraficoMensal(filtrado);
     atualizarGraficoTipo(filtrado);
     atualizarGraficoPlaca(filtrado);
-    atualizarResumoCombustível(filtrado);
+    atualizarResumoCombustivel(filtrado);
     atualizarTabela(filtrado);
   }
 
   function limparFiltros() {
     supervisorFiltro.value = '';
     Array.from(placaFiltro.options).forEach((option) => option.selected = false);
-    Array.from(combustívelFiltro.options).forEach((option) => option.selected = false);
+    Array.from(combustivelFiltro.options).forEach((option) => option.selected = false);
     const meses = [...new Set(baseDados.map((item) => item.mes))].sort();
     if (meses.length) {
       mesInicio.value = meses[0];
@@ -546,36 +546,36 @@
         const usaRelatorioBruto = colunas.length >= indiceColunaExcel('AR') + 1;
         const colSupervisor = usaRelatorioBruto ? (colunas[indiceColunaExcel('D')] || colunas[indiceColunaExcel('C')]) : 'Supervisor';
         const colPlaca = usaRelatorioBruto ? colunas[indiceColunaExcel('F')] : 'Placa';
-        const colVeículo = usaRelatorioBruto ? colunas[indiceColunaExcel('G')] : 'Veículo';
+        const colVeiculo = usaRelatorioBruto ? colunas[indiceColunaExcel('G')] : 'Veiculo';
         const colData = usaRelatorioBruto ? colunas[indiceColunaExcel('Y')] : 'Data';
-        const colCombustível = usaRelatorioBruto ? colunas[indiceColunaExcel('AN')] : 'Combustível';
+        const colCombustivel = usaRelatorioBruto ? colunas[indiceColunaExcel('AN')] : 'Combustivel';
         const colValor = usaRelatorioBruto ? colunas[indiceColunaExcel('AR')] : 'Valor';
 
-        if (!colPlaca || !colVeículo || !colData || !colCombustível || !colValor) {
-          atualizarStatus('Não encontrei as colunas exigidas. Para o relatório bruto, a limpeza automática usa Y, F, G, AN e AR.', true);
+        if (!colPlaca || !colVeiculo || !colData || !colCombustivel || !colValor) {
+          atualizarStatus('Nao encontrei as colunas exigidas. Para o relatorio bruto, a limpeza automatica usa Y, F, G, AN e AR.', true);
           return;
         }
 
         baseDados = data.map((linha) => ({
           supervisor: String(linha[colSupervisor] || 'Sem agrupamento').trim(),
           placa: String(linha[colPlaca] || '').trim(),
-          veículo: String(linha[colVeículo] || 'Veículo não informado').trim(),
+          veiculo: String(linha[colVeiculo] || 'Veiculo nao informado').trim(),
           mes: converterData(linha[colData]),
-          combustível: String(linha[colCombustível] || 'Não informado').trim(),
+          combustivel: String(linha[colCombustivel] || 'Nao informado').trim(),
           valor: converterValor(linha[colValor])
-        })).filter((item) => item.placa && item.veículo && item.mes && item.combustível && item.valor >= 0);
+        })).filter((item) => item.placa && item.veiculo && item.mes && item.combustivel && item.valor >= 0);
 
         if (!baseDados.length) {
-          atualizarStatus('O CSV foi lido, mas não encontrei linhas válidas para montar o dashboard.', true);
+          atualizarStatus('O CSV foi lido, mas nao encontrei linhas validas para montar o dashboard.', true);
           return;
         }
 
         atualizarFonteAtual(origem);
-        atualizarStatus(`CSV carregado com sucesso a partir de ${origem}. ${baseDados.length} lancamentos encontrados. Limpeza automática usando ${usaRelatorioBruto ? 'Y, F, G, AN e AR' : 'o modelo padrão'}.`);
+        atualizarStatus(`CSV carregado com sucesso a partir de ${origem}. ${baseDados.length} lancamentos encontrados. Limpeza automatica usando ${usaRelatorioBruto ? 'Y, F, G, AN e AR' : 'o modelo padrao'}.`);
         preencherFiltros();
         aplicarFiltros();
       },
-      error: () => atualizarStatus('Não foi possível ler o CSV selecionado.', true)
+      error: () => atualizarStatus('Nao foi possivel ler o CSV selecionado.', true)
     });
   }
 
@@ -583,13 +583,13 @@
     atualizarStatus(`Carregando ${ARQUIVO_PADRAO}...`);
     fetch(ARQUIVO_PADRAO)
       .then((response) => {
-        if (!response.ok) throw new Error('arquivo não encontrado');
+        if (!response.ok) throw new Error('arquivo nao encontrado');
         return response.text();
       })
-      .then((texto) => carregarTextoCSV(texto, `${ARQUIVO_PADRAO} (padrão)`))
+      .then((texto) => carregarTextoCSV(texto, `${ARQUIVO_PADRAO} (padrao)`))
       .catch(() => {
         atualizarFonteAtual('nenhuma');
-        atualizarStatus(`Não foi possível localizar ${ARQUIVO_PADRAO}.`, true);
+        atualizarStatus(`Nao foi possivel localizar ${ARQUIVO_PADRAO}.`, true);
       });
   }
 
@@ -605,7 +605,7 @@
         const textoReconstruido = Papa.unparse({ fields: meta.fields, data: data.map((item) => meta.fields.map((campo) => item[campo])) });
         carregarTextoCSV(textoReconstruido, arquivo.name);
       },
-      error: () => atualizarStatus('Não foi possível importar o arquivo selecionado.', true)
+      error: () => atualizarStatus('Nao foi possivel importar o arquivo selecionado.', true)
     });
   });
 
@@ -614,7 +614,7 @@
   document.getElementById('limparFiltros').addEventListener('click', limparFiltros);
   supervisorFiltro.addEventListener('change', aplicarFiltros);
   placaFiltro.addEventListener('change', aplicarFiltros);
-  combustívelFiltro.addEventListener('change', aplicarFiltros);
+  combustivelFiltro.addEventListener('change', aplicarFiltros);
   mesInicio.addEventListener('change', aplicarFiltros);
   mesFim.addEventListener('change', aplicarFiltros);
 

@@ -11,7 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
 
 <style>
-  /* Reset e básicos */
+  /* Reset e basicos */
   * { box-sizing: border-box; }
   body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); transition: background-color 0.3s, color 0.3s; }
   body.sidebar-open { overflow: hidden; }
@@ -28,7 +28,7 @@
   h1,h2,h3 { margin: 0 0 10px 0; }
   h1 { text-align: center; }
 
-  /* Layout sidebar + conteúdo */
+  /* Layout sidebar + conteudo */
   body { display: flex; }
   #sidebar { width: 240px; background: linear-gradient(180deg, #073954 0%, #0b2e47 100%); color: white; height: 100vh; position: fixed; top: 0; left: 0; padding: 24px 18px; box-sizing: border-box; overflow-y: auto; box-shadow: inset -1px 0 0 rgba(255,255,255,0.08); z-index: 30; transition: transform 0.28s ease; }
   .sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 6px 8px 18px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.12); }
@@ -48,7 +48,7 @@
   .menu-toggle { border: none; border-radius: 14px; background: var(--primary); color: white; padding: 12px 16px; font-weight: 700; cursor: pointer; box-shadow: 0 12px 24px rgba(7, 57, 84, 0.16); }
   .sidebar-backdrop { position: fixed; inset: 0; background: rgba(7, 23, 36, 0.45); opacity: 0; pointer-events: none; transition: opacity 0.28s ease; z-index: 20; }
 
-  /* Botão tema */
+  /* Botao tema */
   .theme-toggle { position: fixed; top: 15px; right: 15px; background: var(--secondary); border: none; color: white; padding: 10px 18px; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px rgba(251,63,58,0.6); z-index: 100; }
   .theme-toggle:hover { background: #a82824; }
 
@@ -64,12 +64,12 @@
   select:hover,input[type=month]:hover { background: var(--secondary); color:white; }
   select:focus,input[type=month]:focus { outline:none; border-color: var(--primary); }
 
-  /* Gráficos */
+  /* Graficos */
   .grafico { margin-bottom: 45px; }
   .grafico h3 { font-size:1.8rem; font-weight:bold; text-align:center; margin-bottom:10px; color:var(--primary); }
   .grafico canvas { max-width:100%; height:600px; border-radius:8px; box-shadow:0 3px 8px rgba(0,0,0,0.12); display:inline-block; }
 
-  /* Gráfico anual maior */
+  /* Grafico anual maior */
   #pizzaContainer { width:100%; max-width:100%; height:700px; margin:0 auto 40px auto; }
   #pizzaContainer canvas { width:100% !important; height:100% !important; display:block; }
 
@@ -128,11 +128,11 @@
   <!-- Filtros -->
   <div class="filtros">
     <select id="fornecedorFiltro" multiple size="5" title="Selecione fornecedores"></select>
-    <input type="month" id="mesInicio" title="Mês início" />
-    <input type="month" id="mesFim" title="Mês fim" />
+    <input type="month" id="mesInicio" title="Mes inicio" />
+    <input type="month" id="mesFim" title="Mes fim" />
   </div>
 
-  <!-- Gráficos -->
+  <!-- Graficos -->
   <div id="graficosContainer"></div>
   
 
@@ -163,11 +163,11 @@
   }());
 
   // Mantive seu JS original, apenas ajustei:
-  // 1) Gráfico anual usa só cor azul (#073954)
+  // 1) Grafico anual usa so cor azul (#073954)
   // 2) Labels BRL acima da barra (datalabels)
-  // 3) Integração sidebar + mainContent
+  // 3) Integracao sidebar + mainContent
 
-  // (TODO: incluir todo o seu JS atual daqui, sem alteração, mantendo funções: carregarDados, criarResumo, criarGraficos, criarGraficoPorFornecedor, notas, toggleTema etc.)
+  // (TODO: incluir todo o seu JS atual daqui, sem alteracao, mantendo funcoes: carregarDados, criarResumo, criarGraficos, criarGraficoPorFornecedor, notas, toggleTema etc.)
 
 </script>
 
@@ -198,7 +198,7 @@
     "PONTOCOM": 149.90,
     "B&R SOLUCOES": 1059,
     "TRADEPRO TECNOLOGIA": 1984.00,
-    "ASV INTELIGÊNCIA DE DADOS": 1200.00,
+    "ASV INTELIGENCIA DE DADOS": 1200.00,
     "RD STATION CONVERSAS": 2899.00,
     "RMA SERVICOS": 250
   };
@@ -206,12 +206,12 @@
   function gerarCores(num) {
   const cores = [];
   for (let i = 0; i < num; i++) {
-    const hue = Math.floor((i * 360) / num); // distribui tons no círculo de cores
+    const hue = Math.floor((i * 360) / num); // distribui tons no circulo de cores
     cores.push(`hsl(${hue}, 70%, 45%)`);
   }
   return cores;
 }
-  // Variáveis globais
+  // Variaveis globais
   let dadosPorFornecedor = {};
   let fornecedores = [];
   let mesesOrdenados = [];
@@ -219,12 +219,12 @@
   let pizzaChart = null;
   let notas = {}; // notas por fornecedor
 
-  // Função para formatar moeda BRL
+  // Funcao para formatar moeda BRL
   function formatarBRL(valor) {
     return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
 
-  // Função para ordenar meses (string YYYY-MM)
+  // Funcao para ordenar meses (string YYYY-MM)
   function ordenarMeses(meses) {
     return meses.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   }
@@ -236,7 +236,7 @@
       header: true,
       skipEmptyLines: true,
       complete: function(results) {
-        const dados = results.data.filter(item => item.Fornecedor && item.Mês && item.Valor);
+        const dados = results.data.filter(item => item.Fornecedor && item.Mes && item.Valor);
 
         dadosPorFornecedor = {};
         fornecedores = [];
@@ -244,7 +244,7 @@
 
         dados.forEach(item => {
           const f = item.Fornecedor.trim();
-          const mes = item.Mês.trim();
+          const mes = item.Mes.trim();
 
           let valorStr = item.Valor ? item.Valor.toString().trim() : '';
           if (!valorStr || valorStr === '-' || valorStr === '') return;
@@ -299,7 +299,7 @@
     }
   }
 
-  // Cria cards resumo total, média, maior gasto
+  // Cria cards resumo total, media, maior gasto
  function criarResumo() {
   const div = document.getElementById('resumoCards');
   div.innerHTML = '';
@@ -338,8 +338,8 @@
   const futuro     = 735597.84;
 
   const cards = [
-    { titulo: 'Total do Período',       valor: formatarBRL(totalGeral) },
-    { titulo: 'Média Mensal',           valor: formatarBRL(media) },
+    { titulo: 'Total do Periodo',       valor: formatarBRL(totalGeral) },
+    { titulo: 'Media Mensal',           valor: formatarBRL(media) },
     { titulo: 'Maior Gasto',            valor: formatarBRL(maiorGasto) },
     { titulo: 'Meta de Gasto Mensal',   valor: formatarBRL(meta) },
     { titulo: 'Meta de Gasto 2026',     valor: formatarBRL(futuro) },
@@ -354,12 +354,12 @@
 }
 
 
-  // Função que filtra meses de acordo com intervalo selecionado
+  // Funcao que filtra meses de acordo com intervalo selecionado
   function filtrarMeses(meses, inicio, fim) {
     return meses.filter(m => m >= inicio && m <= fim);
   }
 
-  // Cria gráficos
+  // Cria graficos
   function criarGraficos() {
     const container = document.getElementById('graficosContainer');
     container.innerHTML = '';
@@ -375,29 +375,29 @@
     const selecionados = Array.from(selectForn.selectedOptions).map(opt => opt.value);
 
     selecionados.forEach(fornecedor => {
-      // Preparar dados do fornecedor filtrado por mês
+      // Preparar dados do fornecedor filtrado por mes
       const mesesFornecedor = Object.keys(dadosPorFornecedor[fornecedor]).filter(m => m >= mesInicio && m <= mesFim);
       const mesesFiltrados = ordenarMeses(mesesFornecedor);
       const valores = mesesFiltrados.map(m => dadosPorFornecedor[fornecedor][m]);
 
-      // Container gráfico
+      // Container grafico
       const divGrafico = document.createElement('div');
       divGrafico.classList.add('grafico');
       container.appendChild(divGrafico);
 
-      // Título
+      // Titulo
       const h3 = document.createElement('h3');
 
 // Normaliza nome para buscar imagem
 const imgNome = fornecedor
   .normalize("NFD") // remove acentos
   .replace(/[\u0300-\u036f]/g, "")
-  .replace(/\s+/g, "_"); // troca espaços por underline
+  .replace(/\s+/g, "_"); // troca espacos por underline
 
 // Caminho da logo
 const logoPath = `logos/${imgNome}.png`;
 
-// HTML do título com tentativa de logo
+// HTML do titulo com tentativa de logo
 h3.innerHTML = `
   <img src="${logoPath}" alt="${fornecedor}" 
        style="height:35px; vertical-align:middle; margin-right:8px;"
@@ -407,18 +407,18 @@ h3.innerHTML = `
 
 divGrafico.appendChild(h3);
 
-      // Canvas para gráfico de barras
+      // Canvas para grafico de barras
       const canvasBar = document.createElement('canvas');
       divGrafico.appendChild(canvasBar);
 
       // Meta do fornecedor para linha
       const meta = metasPorFornecedor[fornecedor] ?? 0;
 
-      // Calcular máximo entre valores e meta para ajustar o eixo Y
+      // Calcular maximo entre valores e meta para ajustar o eixo Y
 const maxValor = Math.max(...valores);
 const maxEixoY = Math.max(maxValor, meta) * 1.1; // 10% acima do maior valor
 
-      // Criar gráfico de barras
+      // Criar grafico de barras
       const ctxBar = canvasBar.getContext('2d');
 const chartBar = new Chart(ctxBar, {
   type: 'bar',
@@ -489,9 +489,9 @@ const chartBar = new Chart(ctxBar, {
 });
       charts[fornecedor] = [chartBar];
 
-      // Botão exportar
+      // Botao exportar
       const btnExport = document.createElement('button');
-      btnExport.textContent = 'Exportar gráficos como PNG';
+      btnExport.textContent = 'Exportar graficos como PNG';
       btnExport.classList.add('btn-export');
       btnExport.onclick = () => {
         exportChartsAsImage(chartBar, fornecedor);
@@ -500,7 +500,7 @@ const chartBar = new Chart(ctxBar, {
     });
   }
 
-  // Exportar gráficos como PNG (concatena os dois lado a lado)
+  // Exportar graficos como PNG (concatena os dois lado a lado)
   function exportChartsAsImage(chartBar, nomeFornecedor) {
   const canvasBar = chartBar.canvas;
 
@@ -516,9 +516,9 @@ const chartBar = new Chart(ctxBar, {
   link.href = exportCanvas.toDataURL('image/png');
   link.click();
 }
-  // Criar gráfico pizza de proporção anual
-  // Cria gráfico de barras mostrando total por fornecedor
-// Cria gráfico anual de barras (substitui gráfico de pizza)
+  // Criar grafico pizza de proporcao anual
+  // Cria grafico de barras mostrando total por fornecedor
+// Cria grafico anual de barras (substitui grafico de pizza)
 function criarGraficoPorFornecedor() {
   const ctx = document.getElementById('pizzaChart').getContext('2d');
   if (pizzaChart) pizzaChart.destroy();
@@ -561,7 +561,7 @@ function criarGraficoPorFornecedor() {
   });
 }
  
-  // Atualizar gráficos quando filtros mudam
+  // Atualizar graficos quando filtros mudam
   function ativarFiltros() {
     const selectForn = document.getElementById('fornecedorFiltro');
     const mesInicio = document.getElementById('mesInicio');
@@ -571,7 +571,7 @@ function criarGraficoPorFornecedor() {
       el.addEventListener('change', () => {
         // Validar intervalo
         if (mesInicio.value > mesFim.value) {
-          alert('Mês início deve ser anterior ou igual ao mês fim.');
+          alert('Mes inicio deve ser anterior ou igual ao mes fim.');
           return;
         }
         criarResumo();
@@ -591,7 +591,7 @@ function criarGraficoPorFornecedor() {
     };
   }
 
-  // Inicialização
+  // Inicializacao
   window.onload = () => {
     toggleTema();
     carregarDados();

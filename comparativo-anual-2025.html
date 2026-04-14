@@ -359,7 +359,7 @@ function formatarBRL(valor) {
 
 function normalizarMes(valor) {
   const mapa = {
-    'Março': 'Marco',
+    'Marco': 'Marco',
     'Marco': 'Marco'
   };
   return mapa[valor] || valor;
@@ -379,12 +379,12 @@ function carregarCSV(ano) {
       header: true,
       skipEmptyLines: true,
       complete: function(results) {
-        const dados = results.data.filter(item => (item['Mês'] || item['Mes']) && item.Valor);
+        const dados = results.data.filter(item => (item['Mes'] || item['Mes']) && item.Valor);
         const totaisPorMes = {};
         let totalAno = 0;
 
         dados.forEach(item => {
-          const mes = normalizarMes((item['Mês'] || item['Mes'] || '').trim());
+          const mes = normalizarMes((item['Mes'] || item['Mes'] || '').trim());
           let valorStr = String(item.Valor || '').replace(/^R\$ ?/, '').replace(/[^0-9,\.]/g, '').replace(',', '.');
           const valor = parseFloat(valorStr);
           if (!mes || isNaN(valor)) return;
@@ -474,7 +474,7 @@ async function atualizarComparativo() {
   let simboloTotal = '->';
   if (totalAno1Mes > 0) {
     diffTotal = ((totalAno2Mes - totalAno1Mes) / totalAno1Mes) * 100;
-    simboloTotal = diffTotal > 0 ? '↑' : diffTotal < 0 ? '↓' : '->';
+    simboloTotal = diffTotal > 0 ? '+' : diffTotal < 0 ? '-' : '->';
   }
 
   const corTotal = diffTotal > 0 ? 'var(--red)' : diffTotal < 0 ? 'var(--green)' : 'var(--primary)';
@@ -496,7 +496,7 @@ async function atualizarComparativo() {
     let simbolo = '->';
     if (v1 > 0) {
       diff = ((v2 - v1) / v1) * 100;
-      simbolo = diff > 0 ? '↑' : diff < 0 ? '↓' : '->';
+      simbolo = diff > 0 ? '+' : diff < 0 ? '-' : '->';
     }
     const cor = diff > 0 ? 'var(--red)' : diff < 0 ? 'var(--green)' : 'var(--primary)';
     const card = document.createElement('div');
