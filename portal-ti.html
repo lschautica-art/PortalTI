@@ -230,7 +230,9 @@
   async function carregarNoticiasTi() {
     const status = document.getElementById('statusNoticiasTi');
     const lista = document.getElementById('listaNoticiasTi');
-    const endpoint = '/api/news/ti';
+    const endpoint = window.location.protocol === 'file:'
+      ? 'http://127.0.0.1:8000/api/news/ti'
+      : `/api/news/ti?_=${Date.now()}`;
 
     status.textContent = 'Carregando noticias de tecnologia da ultima semana...';
     lista.innerHTML = '<div class="news-empty">Buscando noticias...</div>';
@@ -251,8 +253,8 @@
       status.textContent = aviso || 'Noticias de tecnologia atualizadas com sucesso.';
       lista.innerHTML = artigos.map(montarCardNoticia).join('');
     } catch (erro) {
-      status.textContent = 'Nao foi possivel carregar as noticias agora. Verifique se o backend Python esta rodando com GNEWS_API_KEY configurada.';
-      lista.innerHTML = '<div class="news-empty">A consulta falhou. Inicie o servidor Python e defina a chave da GNews no backend para liberar esta area.</div>';
+      status.textContent = 'Nao foi possivel carregar as noticias agora. Tente novamente em alguns minutos.';
+      lista.innerHTML = '<div class="news-empty">A consulta falhou. Se estiver no site publicado, confirme se as funcoes do Netlify estao ativas. Em uso local, rode o servidor Python.</div>';
       console.error('Erro ao carregar noticias de TI:', erro);
     }
   }

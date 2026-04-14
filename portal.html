@@ -355,8 +355,8 @@ verificarLogin();
       status.textContent = aviso || 'Noticias de varejo e mercado atualizadas com sucesso.';
       lista.innerHTML = artigos.map(montarCardNoticia).join('');
     } catch (erro) {
-      status.textContent = 'Nao foi possivel carregar as noticias agora. Verifique se o backend de noticias esta disponivel.';
-      lista.innerHTML = '<div class="news-empty">A consulta falhou. No ambiente local, rode o servidor Python. No Netlify, confirme se a function de noticias foi publicada.</div>';
+      status.textContent = 'Nao foi possivel carregar as noticias agora. Tente novamente em alguns minutos.';
+      lista.innerHTML = '<div class="news-empty">A consulta falhou. No site publicado, confirme se as funcoes do Netlify estao ativas. Em uso local, rode o servidor Python.</div>';
       console.error('Erro ao carregar noticias do portal inicial:', erro);
     }
   }
