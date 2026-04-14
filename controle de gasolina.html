@@ -71,13 +71,55 @@
   .chart-wrap.ranking { min-height: 420px; }
   .table-scroll { width: 100%; overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; }
+  .responsive-table { min-width: 640px; }
   th, td { padding: 12px 10px; border-bottom: 1px solid var(--border); text-align: left; font-size: 0.95rem; }
   th { color: var(--muted); font-weight: 700; }
   tbody tr:hover { background: #f8fbfd; }
   .empty { padding: 32px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--border); border-radius: 18px; }
   @media (max-width: 1200px) { .layout, .chart-grid { grid-template-columns: 1fr; } .panel { position: static; } .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 900px) { body { display: block; } #sidebar { width: min(300px, 82vw); height: 100vh; transform: translateX(-100%); } body.sidebar-open #sidebar { transform: translateX(0); } body.sidebar-open .sidebar-backdrop { opacity: 1; pointer-events: auto; } #mainContent { width: 100%; margin-left: 0; } .mobile-topbar { display: flex; } .btn-row { grid-template-columns: 1fr; } }
-  @media (max-width: 640px) { #mainContent { padding: 16px 14px; } .cards { grid-template-columns: 1fr; } .hero, .panel, .card, .chart-card, .table-card { border-radius: 18px; } .chart-wrap { height: 300px; } .chart-wrap.ranking { min-height: 320px; } .field input, .field select, button { font-size: 0.95rem; } th, td { white-space: nowrap; } }
+  @media (max-width: 640px) {
+    #mainContent { padding: 16px 14px; }
+    .cards { grid-template-columns: 1fr; }
+    .hero, .panel, .card, .chart-card, .table-card { border-radius: 18px; }
+    .chart-wrap { height: 300px; }
+    .chart-wrap.ranking { min-height: 320px; }
+    .field input, .field select, button { font-size: 0.95rem; }
+    .table-scroll { overflow: visible; }
+    .responsive-table { min-width: 0; }
+    .responsive-table thead { display: none; }
+    .responsive-table tbody,
+    .responsive-table tr,
+    .responsive-table td { display: block; width: 100%; }
+    .responsive-table tr {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 8px 0;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 18px rgba(7, 57, 84, 0.06);
+    }
+    .responsive-table td {
+      white-space: normal;
+      border-bottom: 1px solid #edf2f7;
+      padding: 10px 14px 10px 46%;
+      position: relative;
+      min-height: 44px;
+    }
+    .responsive-table td:last-child { border-bottom: none; }
+    .responsive-table td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 14px;
+      top: 10px;
+      width: 40%;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+  }
 </style>
 </head>
 <body>
@@ -436,7 +478,7 @@
     });
     const linhas = Object.entries(agrupado).sort((a, b) => b[1].total - a[1].total);
     combustivelResumo.className = '';
-    combustivelResumo.innerHTML = `<table><thead><tr><th>Combustivel</th><th>Total</th><th>Placas</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map(([tipo, info]) => `<tr><td>${tipo}</td><td>${formatarBRL(info.total)}</td><td>${info.placas.size}</td><td>${info.lancamentos}</td></tr>`).join('')}</tbody></table>`;
+    combustivelResumo.innerHTML = `<div class="table-scroll"><table class="responsive-table"><thead><tr><th>Combustivel</th><th>Total</th><th>Placas</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map(([tipo, info]) => `<tr><td data-label="Combustivel">${tipo}</td><td data-label="Total">${formatarBRL(info.total)}</td><td data-label="Placas">${info.placas.size}</td><td data-label="Lancamentos">${info.lancamentos}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
   function atualizarTabela(dados) {
@@ -455,7 +497,7 @@
     });
     const linhas = Object.values(resumo).sort((a, b) => b.total - a.total);
     tabelaContainer.className = '';
-    tabelaContainer.innerHTML = `<table><thead><tr><th>Supervisor</th><th>Placa</th><th>Veiculo</th><th>Combustivel</th><th>Total</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map((linha) => `<tr><td>${linha.supervisor}</td><td>${linha.placa}</td><td>${linha.veiculo}</td><td>${linha.combustivel}</td><td>${formatarBRL(linha.total)}</td><td>${linha.lancamentos}</td></tr>`).join('')}</tbody></table>`;
+    tabelaContainer.innerHTML = `<div class="table-scroll"><table class="responsive-table"><thead><tr><th>Supervisor</th><th>Placa</th><th>Veiculo</th><th>Combustivel</th><th>Total</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map((linha) => `<tr><td data-label="Supervisor">${linha.supervisor}</td><td data-label="Placa">${linha.placa}</td><td data-label="Veiculo">${linha.veiculo}</td><td data-label="Combustivel">${linha.combustivel}</td><td data-label="Total">${formatarBRL(linha.total)}</td><td data-label="Lancamentos">${linha.lancamentos}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
   function aplicarFiltros() {
