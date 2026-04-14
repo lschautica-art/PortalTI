@@ -180,6 +180,21 @@ class PortalHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(BASE_DIR), **kwargs)
 
+    def send_api_headers(self, content_length: int) -> None:
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(content_length))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
     def do_GET(self):
         parsed = urlparse(self.path)
         route = parsed.path.rstrip("/") or "/"
@@ -196,9 +211,7 @@ class PortalHandler(SimpleHTTPRequestHandler):
             status, payload = fetch_news(section)
             body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
             self.send_response(status)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.send_header("Cache-Control", "no-store")
+            self.send_api_headers(len(body))
             self.end_headers()
             self.wfile.write(body)
             return
