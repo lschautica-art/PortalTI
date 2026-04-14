@@ -240,14 +240,15 @@
       if (!resposta.ok) throw new Error(`Falha ${resposta.status}`);
       const dados = await resposta.json();
       const artigos = Array.isArray(dados.articles) ? dados.articles : [];
+      const aviso = dados.warning ? String(dados.warning) : '';
 
       if (!artigos.length) {
-        status.textContent = 'Nenhuma noticia recente foi encontrada para tecnologia nesta semana.';
-        lista.innerHTML = '<div class="news-empty">O backend respondeu sem artigos para o filtro atual. Tente novamente mais tarde.</div>';
+        status.textContent = aviso || 'Nenhuma noticia recente foi encontrada para tecnologia nesta semana.';
+        lista.innerHTML = `<div class="news-empty">${aviso || 'O backend respondeu sem artigos para o filtro atual. Tente novamente mais tarde.'}</div>`;
         return;
       }
 
-      status.textContent = 'Noticias de tecnologia atualizadas com sucesso.';
+      status.textContent = aviso || 'Noticias de tecnologia atualizadas com sucesso.';
       lista.innerHTML = artigos.map(montarCardNoticia).join('');
     } catch (erro) {
       status.textContent = 'Nao foi possivel carregar as noticias agora. Verifique se o backend Python esta rodando com GNEWS_API_KEY configurada.';

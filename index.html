@@ -35,7 +35,7 @@
     <h2>Login - Gastos TI</h2>
     <div class="input-group">
       <i class="fas fa-user"></i>
-      <input type="text" id="usuario" placeholder="Digite seu usuario" autocomplete="off" />
+      <input type="text" id="usuario" placeholder="Digite seu usuário" autocomplete="off" />
     </div>
     <div class="input-group">
       <i class="fas fa-lock"></i>
@@ -76,7 +76,7 @@
     const senha = inputSenha.value.trim();
 
     if(!usuario || !senha){
-      mostrarErro("Preencha usuario e senha.");
+      mostrarErro("Preencha usuário e senha.");
       if(!usuario) inputUsuario.classList.add('error');
       if(!senha) inputSenha.classList.add('error');
       return;
@@ -102,7 +102,7 @@
           window.location.href = 'portal.html';
         }, 1200);
       } else {
-        mostrarErro("Usuario ou senha incorretos.");
+        mostrarErro("Usuário ou senha incorretos.");
         btnLogin.textContent = "Entrar";
         btnLogin.disabled = false;
         inputUsuario.classList.add('error');

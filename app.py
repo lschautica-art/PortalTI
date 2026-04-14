@@ -9,6 +9,8 @@ from urllib.request import Request, urlopen
 
 
 BASE_DIR = Path(__file__).resolve().parent
+CACHE_DIR = BASE_DIR / ".cache"
+CACHE_TTL_SECONDS = int(os.getenv("PORTAL_NEWS_CACHE_TTL", "900"))
 
 
 def load_dotenv(path: Path) -> None:
@@ -38,7 +40,7 @@ NEWS_CONFIG = {
         "alt_path": "/.netlify/functions/news-ti",
         "endpoint": "/search",
         "params": {
-            "q": '"tecnologia da informacao" OR ciberseguranca OR cloud OR "inteligencia artificial" OR software OR infraestrutura OR dados OR microsoft OR google OR aws OR oracle OR totvs OR erp',
+            "q": '"tecnologia da informacao" OR ciberseguranca OR cloud OR software OR infraestrutura OR dados OR microsoft OR google OR aws OR oracle',
             "lang": "pt",
             "country": "br",
             "max": "6",
@@ -50,7 +52,7 @@ NEWS_CONFIG = {
         "alt_path": "/.netlify/functions/news-rh",
         "endpoint": "/search",
         "params": {
-            "q": '"mercado de trabalho" OR salarios OR salario OR remuneracao OR remuneracao OR beneficios OR beneficios OR "politicas trabalhistas" OR "relacoes trabalhistas" OR "direitos trabalhistas" OR emprego OR empregos OR "jornada de trabalho" OR home office OR "trabalho hibrido"',
+            "q": '"mercado de trabalho" OR salario OR beneficios OR emprego OR "jornada de trabalho" OR "home office" OR "trabalho hibrido" OR "direitos trabalhistas"',
             "lang": "pt",
             "country": "br",
             "max": "6",
@@ -80,6 +82,44 @@ def normalize_articles(payload: dict) -> dict:
     return {"articles": articles}
 
 
+def get_cache_path(section: str) -> Path:
+    return CACHE_DIR / f"news-{section}.json"
+
+
+def load_cached_news(section: str, *, allow_stale: bool = True) -> dict | None:
+    cache_path = get_cache_path(section)
+    if not cache_path.exists():
+        return None
+
+    try:
+        payload = json.loads(cache_path.read_text(encoding="utf-8"))
+        fetched_at = datetime.fromisoformat(payload["fetched_at"])
+        age_seconds = (datetime.now(timezone.utc) - fetched_at).total_seconds()
+        if allow_stale or age_seconds <= CACHE_TTL_SECONDS:
+            return payload["data"]
+    except Exception:
+        return None
+
+    return None
+
+
+def save_cached_news(section: str, data: dict) -> None:
+    CACHE_DIR.mkdir(exist_ok=True)
+    cache_path = get_cache_path(section)
+    payload = {
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
+        "data": data,
+    }
+    cache_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+
+
+def build_warning_payload(message: str) -> dict:
+    return {
+        "articles": [],
+        "warning": message,
+    }
+
+
 def fetch_news(section: str) -> tuple[int, dict]:
     if section not in NEWS_CONFIG:
         return 404, {"error": "Secao de noticias nao encontrada."}
@@ -88,6 +128,10 @@ def fetch_news(section: str) -> tuple[int, dict]:
         return 503, {"error": "Defina a variavel de ambiente GNEWS_API_KEY no backend."}
 
     config = NEWS_CONFIG[section]
+    cached_data = load_cached_news(section, allow_stale=False)
+    if cached_data:
+        return 200, cached_data
+
     params = dict(config["params"])
     params["from"] = iso_week_ago()
     params["apikey"] = GNEWS_API_KEY
@@ -103,13 +147,32 @@ def fetch_news(section: str) -> tuple[int, dict]:
     try:
         with urlopen(request, timeout=20) as response:
             data = json.loads(response.read().decode("utf-8"))
-            return 200, normalize_articles(data)
+            normalized = normalize_articles(data)
+            save_cached_news(section, normalized)
+            return 200, normalized
     except HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="ignore")
+        stale_cache = load_cached_news(section, allow_stale=True)
+        if stale_cache:
+            stale_cache["cached"] = True
+            stale_cache["warning"] = "Servindo noticias em cache por indisponibilidade temporaria da GNews."
+            return 200, stale_cache
+        if exc.code == 429 or "too many requests" in detail.lower():
+            return 200, build_warning_payload("A GNews limitou temporariamente as consultas desta chave. Tente novamente em alguns minutos.")
         return exc.code, {"error": "Falha ao consultar a GNews.", "detail": detail or str(exc)}
     except URLError as exc:
+        stale_cache = load_cached_news(section, allow_stale=True)
+        if stale_cache:
+            stale_cache["cached"] = True
+            stale_cache["warning"] = "Servindo noticias em cache por falha temporaria de conexao."
+            return 200, stale_cache
         return 502, {"error": "Nao foi possivel conectar ao servico de noticias.", "detail": str(exc.reason)}
     except Exception as exc:
+        stale_cache = load_cached_news(section, allow_stale=True)
+        if stale_cache:
+            stale_cache["cached"] = True
+            stale_cache["warning"] = "Servindo noticias em cache por erro temporario no backend."
+            return 200, stale_cache
         return 500, {"error": "Erro inesperado no backend de noticias.", "detail": str(exc)}
 
 
