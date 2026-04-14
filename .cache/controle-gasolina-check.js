@@ -33,6 +33,7 @@
   const mesFim = document.getElementById('mesFim');
   const statusBox = document.getElementById('statusBox');
   const cadastroStatus = document.getElementById('cadastroStatus');
+  const salvamentoStatus = document.getElementById('salvamentoStatus');
   const fonteAtual = document.getElementById('fonteAtual');
   const cadastroAtual = document.getElementById('cadastroAtual');
   const cardTotal = document.getElementById('cardTotal');
@@ -64,6 +65,7 @@
   function atualizarStatus(texto, erro = false) {
     statusBox.textContent = texto;
     statusBox.classList.toggle('error', erro);
+    statusBox.classList.remove('success');
   }
 
   function atualizarFonteAtual(texto) {
@@ -77,6 +79,14 @@
   function atualizarStatusCadastro(texto, erro = false) {
     cadastroStatus.textContent = texto;
     cadastroStatus.classList.toggle('error', erro);
+    cadastroStatus.classList.remove('success');
+  }
+
+  function atualizarStatusSalvamento(texto, tipo = 'neutral') {
+    salvamentoStatus.textContent = texto;
+    salvamentoStatus.classList.remove('error', 'success');
+    if (tipo === 'error') salvamentoStatus.classList.add('error');
+    if (tipo === 'success') salvamentoStatus.classList.add('success');
   }
 
   function obterClienteSupabase() {
@@ -519,6 +529,7 @@
     atualizarFonteCadastro('aguardando carga');
     atualizarStatus('Pagina limpa. Nenhum CSV carregado na sessao atual.');
     atualizarStatusCadastro('Pagina limpa. Se quiser, importe novamente o CSV da filial ou carregue do Supabase.');
+    atualizarStatusSalvamento('Salvamento: nenhum upload enviado nesta sessao.');
   }
 
   function carregarTextoCSV(texto, origem = 'arquivo importado') {
@@ -599,6 +610,7 @@
   function carregarArquivoPadrao() {
     atualizarStatus('Carregando CSV da matriz salvo no Supabase...');
     atualizarStatusCadastro('Carregando CSV da filial salvo no Supabase...');
+    atualizarStatusSalvamento('Consultando os ultimos CSVs salvos no Supabase...');
 
     baixarArquivoSupabase(STORAGE_PATH_MATRIZ)
       .then((textoPrincipal) => {
@@ -608,6 +620,7 @@
         return baixarArquivoSupabase(STORAGE_PATH_FILIAL)
           .then((textoComplementar) => {
             carregarCadastroTexto(textoComplementar, 'Supabase / Filial');
+            atualizarStatusSalvamento('Ultimos CSVs carregados do Supabase com sucesso.', 'success');
           })
           .catch(() => {
             dadosComplementares = [];
@@ -615,6 +628,7 @@
             resumoCadastro = null;
             atualizarFonteCadastro('nenhum CSV salvo');
             atualizarStatusCadastro('Nenhum CSV da filial salvo no Supabase. O portal carregou apenas a matriz.');
+            atualizarStatusSalvamento('Ultimo CSV da matriz carregado do Supabase. Nenhum CSV da filial salvo.', 'success');
             carregarTextoCSV(textoPrincipal, 'Supabase / Matriz SC');
           });
       })
@@ -623,10 +637,14 @@
         atualizarStatus('Nao foi possivel localizar um CSV da matriz no Supabase.', true);
 
         baixarArquivoSupabase(STORAGE_PATH_FILIAL)
-          .then((textoComplementar) => carregarCadastroTexto(textoComplementar, 'Supabase / Filial'))
+          .then((textoComplementar) => {
+            atualizarStatusSalvamento('Ultimo CSV da filial carregado do Supabase. Nenhum CSV da matriz salvo.', 'success');
+            carregarCadastroTexto(textoComplementar, 'Supabase / Filial');
+          })
           .catch(() => {
             atualizarFonteCadastro('nenhum CSV salvo');
             atualizarStatusCadastro('Nao encontrei CSVs salvos no Supabase para matriz ou filial.', true);
+            atualizarStatusSalvamento('Nenhum CSV salvo foi encontrado no Supabase.', 'error');
           });
       });
   }
@@ -635,18 +653,32 @@
     const arquivo = event.target.files[0];
     if (!arquivo) return;
     atualizarStatus(`Enviando ${arquivo.name} para o Supabase...`);
+    atualizarStatusSalvamento(`Enviando ${arquivo.name} para o Supabase como CSV atual da matriz...`);
     Promise.all([arquivo.text(), uploadArquivoSupabase(STORAGE_PATH_MATRIZ, arquivo)])
-      .then(([texto]) => carregarTextoCSV(texto, `${arquivo.name} (enviado ao Supabase)`))
-      .catch(() => atualizarStatus('Nao foi possivel importar o arquivo selecionado.', true));
+      .then(([texto]) => {
+        atualizarStatusSalvamento(`Upload concluido. ${arquivo.name} foi salvo no Supabase como CSV atual da matriz.`, 'success');
+        carregarTextoCSV(texto, `${arquivo.name} (enviado ao Supabase)`);
+      })
+      .catch(() => {
+        atualizarStatus('Nao foi possivel importar o arquivo selecionado.', true);
+        atualizarStatusSalvamento(`Falha ao salvar ${arquivo.name} no Supabase.`, 'error');
+      });
   });
 
   cadastroFileInput.addEventListener('change', (event) => {
     const arquivo = event.target.files[0];
     if (!arquivo) return;
     atualizarStatusCadastro(`Enviando ${arquivo.name} para o Supabase...`);
+    atualizarStatusSalvamento(`Enviando ${arquivo.name} para o Supabase como CSV atual da filial...`);
     Promise.all([arquivo.text(), uploadArquivoSupabase(STORAGE_PATH_FILIAL, arquivo)])
-      .then(([texto]) => carregarCadastroTexto(texto, `${arquivo.name} (enviado ao Supabase)`))
-      .catch(() => atualizarStatusCadastro('Nao foi possivel importar o CSV da filial.', true));
+      .then(([texto]) => {
+        atualizarStatusSalvamento(`Upload concluido. ${arquivo.name} foi salvo no Supabase como CSV atual da filial.`, 'success');
+        carregarCadastroTexto(texto, `${arquivo.name} (enviado ao Supabase)`);
+      })
+      .catch(() => {
+        atualizarStatusCadastro('Nao foi possivel importar o CSV da filial.', true);
+        atualizarStatusSalvamento(`Falha ao salvar ${arquivo.name} no Supabase.`, 'error');
+      });
   });
 
   document.getElementById('usarPadrao').addEventListener('click', carregarArquivoPadrao);
