@@ -21,7 +21,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; background: radial-gradient(circle at top right, rgba(251,63,58,0.12), transparent 22%), radial-gradient(circle at top left, rgba(7,57,84,0.12), transparent 28%), var(--bg); color: var(--text); display: flex; }
-  #sidebar { width: 240px; background: linear-gradient(180deg, #073954 0%, #0b2e47 100%); color: white; height: 100vh; position: fixed; top: 0; left: 0; padding: 24px 18px; box-sizing: border-box; overflow-y: auto; box-shadow: inset -1px 0 0 rgba(255,255,255,0.08); }
+  body.sidebar-open { overflow: hidden; }
+  #sidebar { width: 240px; background: linear-gradient(180deg, #073954 0%, #0b2e47 100%); color: white; height: 100vh; position: fixed; top: 0; left: 0; padding: 24px 18px; box-sizing: border-box; overflow-y: auto; box-shadow: inset -1px 0 0 rgba(255,255,255,0.08); z-index: 30; transition: transform 0.28s ease; }
   .sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 6px 8px 18px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.12); }
   .sidebar-brand img { width: 62px; height: auto; object-fit: contain; }
   .sidebar-brand-text strong { display: block; font-size: 1rem; margin-bottom: 4px; }
@@ -34,6 +35,10 @@
   #sidebar .menu-label { margin-top: 16px; }
   #sidebar .menu-label span { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.78); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
   #mainContent { margin-left: 240px; padding: 20px; width: calc(100% - 240px); }
+  .mobile-topbar { display: none; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+  .mobile-topbar strong { color: var(--primary); font-size: 1rem; }
+  .menu-toggle { border: 0; border-radius: 14px; background: var(--primary); color: white; padding: 12px 16px; font-weight: 700; cursor: pointer; box-shadow: 0 12px 24px rgba(7, 57, 84, 0.16); }
+  .sidebar-backdrop { position: fixed; inset: 0; background: rgba(7, 23, 36, 0.45); opacity: 0; pointer-events: none; transition: opacity 0.28s ease; z-index: 20; }
   .hero, .panel, .card, .chart-card, .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); }
   .hero { background: linear-gradient(135deg, #073954, #0b2e47); color: white; padding: 28px 30px; margin-bottom: 24px; }
   .hero h1 { margin: 0 0 10px; font-size: clamp(1.8rem, 3vw, 2.8rem); }
@@ -64,17 +69,19 @@
   .chart-card, .table-card { padding: 20px; }
   .chart-wrap { position: relative; height: 380px; }
   .chart-wrap.ranking { min-height: 420px; }
+  .table-scroll { width: 100%; overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; }
   th, td { padding: 12px 10px; border-bottom: 1px solid var(--border); text-align: left; font-size: 0.95rem; }
   th { color: var(--muted); font-weight: 700; }
   tbody tr:hover { background: #f8fbfd; }
   .empty { padding: 32px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--border); border-radius: 18px; }
   @media (max-width: 1200px) { .layout, .chart-grid { grid-template-columns: 1fr; } .panel { position: static; } .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (max-width: 900px) { body { display: block; } #sidebar { position: relative; width: 100%; height: auto; } #mainContent { width: 100%; margin-left: 0; } .btn-row { grid-template-columns: 1fr; } }
-  @media (max-width: 640px) { #mainContent { padding: 16px; } .cards { grid-template-columns: 1fr; } }
+  @media (max-width: 900px) { body { display: block; } #sidebar { width: min(300px, 82vw); height: 100vh; transform: translateX(-100%); } body.sidebar-open #sidebar { transform: translateX(0); } body.sidebar-open .sidebar-backdrop { opacity: 1; pointer-events: auto; } #mainContent { width: 100%; margin-left: 0; } .mobile-topbar { display: flex; } .btn-row { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { #mainContent { padding: 16px 14px; } .cards { grid-template-columns: 1fr; } .hero, .panel, .card, .chart-card, .table-card { border-radius: 18px; } .chart-wrap { height: 300px; } .chart-wrap.ranking { min-height: 320px; } .field input, .field select, button { font-size: 0.95rem; } th, td { white-space: nowrap; } }
 </style>
 </head>
 <body>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
   <aside id="sidebar">
     <div class="sidebar-brand">
       <img src="logo.png" alt="Logo DC">
@@ -99,6 +106,10 @@
   </aside>
 
   <main id="mainContent">
+    <div class="mobile-topbar">
+      <button class="menu-toggle" id="menuToggle" type="button">Menu</button>
+      <strong>Controle de Combustivel</strong>
+    </div>
     <section class="hero">
       <h1>Controle de Combustivel</h1>
       <p>Ao importar o relatorio bruto do portal, o sistema limpa automaticamente os dados usando as colunas fixas que voce definiu: <strong>Y</strong> para data, <strong>F</strong> para placa, <strong>G</strong> para modelo do veiculo, <strong>AN</strong> para tipo de combustivel e <strong>AR</strong> para valor total com desconto.</p>
@@ -204,6 +215,28 @@
   </main>
 
 <script>
+  (function () {
+    const body = document.body;
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+    function fecharMenu() {
+      body.classList.remove('sidebar-open');
+    }
+
+    if (menuToggle) {
+      menuToggle.addEventListener('click', () => body.classList.toggle('sidebar-open'));
+    }
+
+    if (sidebarBackdrop) {
+      sidebarBackdrop.addEventListener('click', fecharMenu);
+    }
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 900) fecharMenu();
+    });
+  }());
+
   Chart.register(ChartDataLabels);
 
   const csvFileInput = document.getElementById('csvFile');
