@@ -13,6 +13,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/news/comercial"
+  to = "/.netlify/functions/news-comercial"
+  status = 200
+
+[[redirects]]
   from = "/api/news/home"
   to = "/.netlify/functions/news-home"
   status = 200

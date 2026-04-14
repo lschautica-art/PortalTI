@@ -21,19 +21,40 @@ function resolverEmailLogin(login) {
 
 function resolverEndpointNoticias(secao) {
   const secaoNormalizada = String(secao || "").trim().toLowerCase();
-  const sections = new Set(["home", "ti", "rh"]);
+  const sections = new Set(["home", "ti", "rh", "comercial"]);
   if (!sections.has(secaoNormalizada)) {
     throw new Error("Secao de noticias invalida.");
   }
 
+  const sameOriginUrl = `${window.location.origin}/api/news/${secaoNormalizada}`;
   const remoteUrl = `${PORTAL_SUPABASE_URL}/functions/v1/gnews?section=${encodeURIComponent(secaoNormalizada)}&_=${Date.now()}`;
   const localUrl = `http://127.0.0.1:8000/api/news/${secaoNormalizada}`;
+  const endpoints = [];
 
-  if (window.location.protocol === "file:") {
-    return [remoteUrl, localUrl];
+  function adicionarEndpoint(url) {
+    if (!url || endpoints.includes(url)) return;
+    endpoints.push(url);
   }
 
-  return [remoteUrl];
+  if (window.location.protocol === "file:") {
+    adicionarEndpoint(localUrl);
+    adicionarEndpoint(remoteUrl);
+    return endpoints;
+  }
+
+  const host = String(window.location.hostname || "").toLowerCase();
+  const isLocalHost = host === "127.0.0.1" || host === "localhost";
+
+  if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+    adicionarEndpoint(sameOriginUrl);
+  }
+
+  if (isLocalHost) {
+    adicionarEndpoint(localUrl);
+  }
+
+  adicionarEndpoint(remoteUrl);
+  return endpoints;
 }
 
 async function obterSessaoAtual() {

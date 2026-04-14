@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal RH</title>
+<title>Portal Comercial</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 <script>
@@ -45,8 +45,8 @@ window.portalAuth.exigirAutenticacao();
   .brand img { width: 82px; height: auto; }
   .brand strong { display: block; color: var(--primary); font-size: 1.15rem; margin-bottom: 4px; }
   .brand span { color: var(--muted); font-size: 0.94rem; }
-  .tag { background: #fdf0ef; color: #922f3a; border-radius: 999px; padding: 10px 16px; font-weight: 700; }
-  .hero { background: linear-gradient(135deg, #7e1d2d, #b73540); color: white; border-radius: 26px; padding: 34px; margin-bottom: 24px; overflow: hidden; position: relative; }
+  .tag { background: #eff8f3; color: #1f6b4a; border-radius: 999px; padding: 10px 16px; font-weight: 700; }
+  .hero { background: linear-gradient(135deg, #1d6a4f, #2fa36e); color: white; border-radius: 26px; padding: 34px; margin-bottom: 24px; overflow: hidden; position: relative; }
   .hero::after { content: ""; position: absolute; width: 320px; height: 320px; border-radius: 50%; background: rgba(255,255,255,0.08); top: -90px; right: -60px; }
   .hero > * { position: relative; }
   .hero h1 { margin: 0 0 12px; font-size: clamp(2.1rem, 4vw, 3.4rem); }
@@ -56,10 +56,10 @@ window.portalAuth.exigirAutenticacao();
   .summary-card span { display: block; color: var(--muted); margin-bottom: 8px; }
   .summary-card strong { display: block; color: var(--primary); font-size: 1.8rem; }
   .section-title { margin: 0 0 16px; color: var(--primary); font-size: 1.6rem; }
-  .modules-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr); gap: 20px; margin-bottom: 24px; }
+  .modules-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-bottom: 24px; }
   .module-card { border-radius: 22px; padding: 24px; }
   .module-card h3 { margin: 0 0 10px; color: var(--primary); font-size: 1.35rem; }
-  .module-card p { margin: 0 0 18px; color: var(--muted); line-height: 1.6; }
+  .module-card p { margin: 0 0 18px; color: var(--muted); line-height: 1.6; min-height: 94px; }
   .module-card a { display: inline-block; text-decoration: none; background: var(--secondary); color: white; padding: 10px 16px; border-radius: 999px; font-weight: 700; }
   .roadmap { border-radius: 22px; padding: 24px; }
   .roadmap strong { display: block; color: var(--primary); margin-bottom: 8px; font-size: 1.1rem; }
@@ -72,17 +72,17 @@ window.portalAuth.exigirAutenticacao();
   .news-btn { border: 0; border-radius: 999px; padding: 10px 16px; font-weight: 700; cursor: pointer; }
   .news-btn.primary { background: var(--primary); color: white; }
   .news-btn.secondary { background: #edf4f8; color: var(--primary); }
-  .news-status { margin-bottom: 18px; padding: 14px 16px; border-radius: 16px; background: #fdf6f5; color: var(--muted); border: 1px solid rgba(126, 29, 45, 0.08); line-height: 1.6; }
+  .news-status { margin-bottom: 18px; padding: 14px 16px; border-radius: 16px; background: #f4fbf7; color: var(--muted); border: 1px solid rgba(47, 163, 110, 0.14); line-height: 1.6; }
   .news-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
   .news-card { display: flex; flex-direction: column; min-height: 100%; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; background: #fff; }
-  .news-card img { width: 100%; height: 180px; object-fit: cover; background: #efe1e5; }
+  .news-card img { width: 100%; height: 180px; object-fit: cover; background: #ddeadf; }
   .news-card-body { padding: 18px; display: grid; gap: 12px; }
   .news-meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; color: var(--muted); font-size: 0.85rem; }
-  .news-source { font-weight: 700; color: #922f3a; }
+  .news-source { font-weight: 700; color: #1f6b4a; }
   .news-card h3 { margin: 0; font-size: 1.05rem; color: var(--primary); line-height: 1.4; }
   .news-card p { margin: 0; color: var(--muted); line-height: 1.6; font-size: 0.93rem; }
   .news-link { display: inline-flex; align-items: center; width: fit-content; text-decoration: none; color: white; background: var(--secondary); border-radius: 999px; padding: 10px 14px; font-weight: 700; }
-  .news-empty { padding: 24px; border: 1px dashed rgba(126, 29, 45, 0.16); border-radius: 18px; color: var(--muted); background: #fffaf9; }
+  .news-empty { padding: 24px; border: 1px dashed rgba(47, 163, 110, 0.18); border-radius: 18px; color: var(--muted); background: #fbfefc; }
   @media (max-width: 1100px) { .summary-grid, .modules-grid { grid-template-columns: 1fr; } }
   @media (max-width: 980px) { body { display: block; } #sidebar { width: min(300px, 82vw); height: 100vh; transform: translateX(-100%); } body.sidebar-open #sidebar { transform: translateX(0); } body.sidebar-open .sidebar-backdrop { opacity: 1; pointer-events: auto; } #mainContent { width: 100%; margin-left: 0; padding: 18px; } .mobile-topbar { display: flex; } .topbar, .news-head { display: block; } .tag { display: inline-block; margin-top: 14px; } .news-actions { margin-top: 14px; } .news-grid { grid-template-columns: 1fr; } }
   @media (max-width: 640px) { #mainContent { padding: 14px; } .topbar, .hero, .summary-card, .module-card, .roadmap, .news-shell { border-radius: 18px; } .module-card, .news-shell { padding: 20px; } .news-card img { height: 160px; } .news-meta { align-items: flex-start; flex-direction: column; } .news-btn { width: 100%; } }
@@ -107,10 +107,10 @@ window.portalAuth.exigirAutenticacao();
       <li><a href="dashboard-2026.html">Dashboard TI - 2026</a></li>
       <li><a href="comparativo-anual-2025.html">Comparativo Anual</a></li>
       <li class="menu-label"><span>Area RH</span></li>
-      <li><a href="portal-rh.html" class="active">RH</a></li>
+      <li><a href="portal-rh.html">RH</a></li>
       <li><a href="controle de gasolina.html">Controle de combustivel</a></li>
       <li class="menu-label"><span>Area Comercial</span></li>
-      <li><a href="portal-comercial.html">Comercial</a></li>
+      <li><a href="portal-comercial.html" class="active">Comercial</a></li>
       <li><a href="index.html" data-logout-link>Sair</a></li>
     </ul>
   </aside>
@@ -118,61 +118,64 @@ window.portalAuth.exigirAutenticacao();
   <main id="mainContent">
     <div class="mobile-topbar">
       <button class="menu-toggle" id="menuToggle" type="button">Menu</button>
-      <strong>Portal RH</strong>
+      <strong>Portal Comercial</strong>
     </div>
     <section class="topbar">
       <div class="brand">
         <img src="logo.png" alt="Logo DC">
         <div>
-          <strong>Portal RH</strong>
-          <span>Area central para controles administrativos e operacionais de equipes.</span>
+          <strong>Portal Comercial</strong>
+          <span>Area central para indicadores de vendas, clientes e performance do time comercial.</span>
         </div>
       </div>
-      <div class="tag">Recursos Humanos</div>
+      <div class="tag">Comercial</div>
     </section>
 
     <section class="hero">
-      <h1>Controles operacionais organizados por area e por equipe</h1>
-      <p>Esta area foi pensada para reunir paineis que acompanham despesas e processos ligados a equipes, supervisores e rotinas operacionais, com uma apresentacao mais institucional e pronta para expansao.</p>
+      <h1>Acompanhamento comercial com espaco para metas, clientes e vendas</h1>
+      <p>Esta area segue o mesmo padrao institucional das demais, criando uma base pronta para receber paineis de vendas, acompanhamento de carteira, funil comercial, produtividade por equipe e leituras de faturamento.</p>
     </section>
 
     <section class="summary-grid">
-      <article class="summary-card"><span>Modulos ativos</span><strong>1</strong></article>
-      <article class="summary-card"><span>Escopo</span><strong>RH</strong></article>
-      <article class="summary-card"><span>Origem dos dados</span><strong>CSV</strong></article>
-      <article class="summary-card"><span>Foco</span><strong>Equipe</strong></article>
+      <article class="summary-card"><span>Modulos ativos</span><strong>0</strong></article>
+      <article class="summary-card"><span>Escopo</span><strong>Vendas</strong></article>
+      <article class="summary-card"><span>Status</span><strong>Em expansao</strong></article>
+      <article class="summary-card"><span>Foco</span><strong>Receita</strong></article>
     </section>
 
     <section class="news-shell">
       <div class="news-head">
         <div>
           <h2>Noticias da Semana</h2>
-          <p>Mostre noticias recentes sobre recursos humanos, gestao de pessoas e cultura organizacional para tornar a area mais atual e informativa.</p>
+          <p>Atualize a area com manchetes sobre vendas, negociacao, clientes, faturamento e mercado para deixar o portal comercial mais vivo e conectado ao contexto externo.</p>
         </div>
         <div class="news-actions">
-          <button class="news-btn secondary" id="atualizarNoticiasRh" type="button">Atualizar noticias</button>
+          <button class="news-btn secondary" id="atualizarNoticiasComercial" type="button">Atualizar noticias</button>
         </div>
       </div>
-      <div class="news-status" id="statusNoticiasRh">Aguardando o backend de noticias responder.</div>
-      <div class="news-grid" id="listaNoticiasRh"></div>
+      <div class="news-status" id="statusNoticiasComercial">Aguardando o backend de noticias responder.</div>
+      <div class="news-grid" id="listaNoticiasComercial"></div>
     </section>
 
-    <h2 class="section-title">Modulo Disponivel</h2>
+    <h2 class="section-title">Modulos Planejados</h2>
     <section class="modules-grid">
       <article class="module-card">
-        <h3>Controle de gasolina</h3>
-        <p>Dashboard para acompanhar gastos de gasolina por supervisor e vendedor, com filtros por periodo, leitura mensal, ranking por supervisor e tabela detalhada. A estrutura ja esta pronta para receber mais campos e mais controles no futuro.</p>
-        <a href="controle de gasolina.html">Abrir controle</a>
+        <h3>Funil comercial</h3>
+        <p>Espaco ideal para acompanhar oportunidades por etapa, conversao, previsao de fechamento e leitura por vendedor ou supervisor.</p>
       </article>
       <article class="module-card">
-        <h3>Expansao da area</h3>
-        <p>Este espaco pode receber depois outros acompanhamentos, como ajuda de custo, despesas por equipe, adiantamentos, controle de visitas e indicadores por gestor.</p>
+        <h3>Metas e faturamento</h3>
+        <p>Area pronta para receber metas mensais, realizado por periodo, comparativos entre equipes e acompanhamento de receita acumulada.</p>
+      </article>
+      <article class="module-card">
+        <h3>Carteira de clientes</h3>
+        <p>Ponto de entrada para indicadores de ativacao, recorrencia, base atendida, churn comercial e oportunidades por regiao.</p>
       </article>
     </section>
 
     <section class="roadmap">
       <strong>Proxima evolucao da area</strong>
-      <p>O padrao visual e a navegacao ja estao preparados para incluir novos modulos operacionais sem perder a organizacao do portal. A tendencia e transformar esta area em uma central de controles mensais por supervisao.</p>
+      <p>O layout ja esta preparado para incorporar novos dashboards comerciais sem quebrar o padrao do portal. O proximo passo natural e conectar um primeiro painel de metas, vendas ou carteira para transformar esta pagina em uma central operacional da equipe comercial.</p>
     </section>
   </main>
 <script>
@@ -211,7 +214,7 @@ window.portalAuth.exigirAutenticacao();
   }
 
   function montarCardNoticia(item) {
-    const imagem = item.image || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80';
+    const imagem = item.image || 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80';
     return `
       <article class="news-card">
         <img src="${imagem}" alt="${item.title || 'Noticia'}" loading="lazy" referrerpolicy="no-referrer">
@@ -228,12 +231,12 @@ window.portalAuth.exigirAutenticacao();
     `;
   }
 
-  async function carregarNoticiasRh() {
-    const status = document.getElementById('statusNoticiasRh');
-    const lista = document.getElementById('listaNoticiasRh');
-    const endpoints = window.portalAuth.resolverEndpointNoticias('rh');
+  async function carregarNoticiasComercial() {
+    const status = document.getElementById('statusNoticiasComercial');
+    const lista = document.getElementById('listaNoticiasComercial');
+    const endpoints = window.portalAuth.resolverEndpointNoticias('comercial');
 
-    status.textContent = 'Carregando noticias de RH da ultima semana...';
+    status.textContent = 'Carregando noticias da area comercial da ultima semana...';
     lista.innerHTML = '<div class="news-empty">Buscando noticias...</div>';
 
     try {
@@ -256,23 +259,23 @@ window.portalAuth.exigirAutenticacao();
       const aviso = dados.warning ? String(dados.warning) : '';
 
       if (!artigos.length) {
-        status.textContent = aviso || 'Nenhuma noticia recente foi encontrada para RH nesta semana.';
+        status.textContent = aviso || 'Nenhuma noticia recente foi encontrada para a area comercial nesta semana.';
         lista.innerHTML = `<div class="news-empty">${aviso || 'O backend respondeu sem artigos para o filtro atual. Tente novamente mais tarde.'}</div>`;
         return;
       }
 
-      status.textContent = aviso || 'Noticias de RH atualizadas com sucesso.';
+      status.textContent = aviso || 'Noticias da area comercial atualizadas com sucesso.';
       lista.innerHTML = artigos.map(montarCardNoticia).join('');
     } catch (erro) {
       status.textContent = 'Nao foi possivel carregar as noticias agora. Tente novamente em alguns minutos.';
       lista.innerHTML = '<div class="news-empty">A consulta falhou. Verifique se a Edge Function do Supabase esta publicada e se o secret GNEWS_API_KEY esta configurado corretamente.</div>';
-      console.error('Erro ao carregar noticias de RH:', erro);
+      console.error('Erro ao carregar noticias da area comercial:', erro);
     }
   }
 
-  document.getElementById('atualizarNoticiasRh').addEventListener('click', carregarNoticiasRh);
+  document.getElementById('atualizarNoticiasComercial').addEventListener('click', carregarNoticiasComercial);
   window.portalAuth.ativarLinksLogout();
-  carregarNoticiasRh();
+  carregarNoticiasComercial();
 </script>
 </body>
 </html>

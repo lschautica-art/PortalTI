@@ -59,6 +59,18 @@ NEWS_CONFIG = {
             "sortby": "publishedAt",
         },
     },
+    "comercial": {
+        "path": "/api/news/comercial",
+        "alt_path": "/.netlify/functions/news-comercial",
+        "endpoint": "/search",
+        "params": {
+            "q": 'vendas OR comercial OR "forca de vendas" OR clientes OR negociacao OR prospeccao OR prospecção OR "expansao de mercado" OR faturamento',
+            "lang": "pt",
+            "country": "br",
+            "max": "6",
+            "sortby": "publishedAt",
+        },
+    },
     "home": {
         "path": "/api/news/home",
         "alt_path": "/.netlify/functions/news-home",
@@ -216,6 +228,8 @@ class PortalHandler(SimpleHTTPRequestHandler):
             NEWS_CONFIG["ti"]["alt_path"]: "ti",
             NEWS_CONFIG["rh"]["path"]: "rh",
             NEWS_CONFIG["rh"]["alt_path"]: "rh",
+            NEWS_CONFIG["comercial"]["path"]: "comercial",
+            NEWS_CONFIG["comercial"]["alt_path"]: "comercial",
             NEWS_CONFIG["home"]["path"]: "home",
             NEWS_CONFIG["home"]["alt_path"]: "home",
         }
