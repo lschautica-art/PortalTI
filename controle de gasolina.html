@@ -207,6 +207,7 @@ window.portalAuth.exigirAutenticacao();
 
         <div class="btn-row">
           <button class="btn-secondary" id="exportarFiltrado">Exportar filtrado</button>
+          <button class="btn-secondary" id="exportarRelatorio">Exportar relatorio</button>
         </div>
 
         <div class="source-badge" id="fonteAtual">Matriz SC: aguardando carga</div>
@@ -1031,6 +1032,118 @@ window.portalAuth.exigirAutenticacao();
     tabelaContainer.innerHTML = `<div class="table-scroll"><table class="responsive-table"><thead><tr><th>Unidade</th><th>Responsavel</th><th>Placa</th><th>Veiculo</th><th>Combustivel</th><th>Total</th><th>Litros</th><th>Km</th><th>Km/l</th><th>Lancamentos</th></tr></thead><tbody>${linhas.map((linha) => `<tr><td data-label="Unidade">${linha.unidade}</td><td data-label="Responsavel">${linha.supervisor}</td><td data-label="Placa">${linha.placa}</td><td data-label="Veiculo">${linha.veiculo}</td><td data-label="Combustivel">${linha.combustivel}</td><td data-label="Total">${formatarBRL(linha.total)}</td><td data-label="Litros">${formatarNumero(linha.litros)} L</td><td data-label="Km">${formatarNumero(linha.km, 0)}</td><td data-label="Km/l">${linha.litros > 0 && linha.km > 0 ? formatarNumero(linha.km / linha.litros) : '0,00'}</td><td data-label="Lancamentos">${linha.lancamentos}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
+  function obterDadosFiltradosAtuais() {
+    if (!baseDados.length) return [];
+    const unidade = unidadeFiltro.value;
+    const supervisor = supervisorFiltro.value;
+    const placas = obterSelecionados(placaFiltro);
+    const combustiveisSelecionados = obterSelecionados(combustivelFiltro);
+    const inicio = mesInicio.value || '0000-00';
+    const fim = mesFim.value || '9999-12';
+
+    return baseDados.filter((item) => {
+      const okUnidade = !unidade || item.unidade === unidade;
+      const okSupervisor = !supervisor || item.supervisor === supervisor;
+      const okPlaca = !placas.length || placas.includes(item.placa);
+      const okCombustivel = !combustiveisSelecionados.length || combustiveisSelecionados.includes(item.combustivel);
+      const okPeriodo = item.mes >= inicio && item.mes <= fim;
+      return okUnidade && okSupervisor && okPlaca && okCombustivel && okPeriodo;
+    });
+  }
+
+  function agregarPorCampo(dados, chaveFn) {
+    const agrupado = {};
+    dados.forEach((item) => {
+      const chave = chaveFn(item);
+      if (!agrupado[chave]) agrupado[chave] = { nome: chave, total: 0, lancamentos: 0 };
+      agrupado[chave].total += item.valor;
+      agrupado[chave].lancamentos += 1;
+    });
+    return Object.values(agrupado).sort((a, b) => b.total - a.total);
+  }
+
+  function gerarTabelaRelatorio(titulo, colunas, linhas) {
+    return `
+      <section class="report-section">
+        <h2>${titulo}</h2>
+        <table>
+          <thead><tr>${colunas.map((coluna) => `<th>${coluna}</th>`).join('')}</tr></thead>
+          <tbody>${linhas.join('')}</tbody>
+        </table>
+      </section>
+    `;
+  }
+
+  function exportarRelatorioGerencial() {
+    const dados = obterDadosFiltradosAtuais();
+    if (!dados.length) {
+      atualizarStatusSalvamento('Nao ha dados filtrados para gerar o relatorio.', 'error');
+      return;
+    }
+
+    const total = dados.reduce((soma, item) => soma + item.valor, 0);
+    const porResponsavel = agregarPorCampo(dados, (item) => item.supervisor).slice(0, 15);
+    const porUnidade = agregarPorCampo(dados, (item) => item.unidade);
+    const porCidade = agregarPorCampo(dados, (item) => item.cidade).slice(0, 15);
+    const porCombustivel = agregarPorCampo(dados, (item) => item.combustivel);
+    const porVeiculo = agregarPorCampo(dados, (item) => `${item.placa} - ${item.veiculo}`).slice(0, 15);
+    const porMes = agregarPorCampo(dados, (item) => item.mes);
+    const mesMaiorGasto = porMes[0] || null;
+    const destaqueSprinter = porVeiculo.find((item) => item.nome.toLowerCase().includes('sprinter'));
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <title>Relatorio Gerencial de Combustivel</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 32px; color: #17324a; }
+          h1 { margin: 0 0 8px; color: #073954; }
+          h2 { margin: 28px 0 12px; color: #0a5678; }
+          .meta { color: #60758a; margin-bottom: 22px; }
+          .summary { display: grid; grid-template-columns: repeat(4, minmax(140px, 1fr)); gap: 12px; margin-bottom: 28px; }
+          .summary div { border: 1px solid #d9e4ec; border-radius: 12px; padding: 14px; background: #f7fafc; }
+          .summary span { display: block; color: #60758a; font-size: 12px; margin-bottom: 6px; }
+          .summary strong { font-size: 24px; color: #073954; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th, td { border-bottom: 1px solid #d9e4ec; padding: 10px 8px; text-align: left; font-size: 14px; }
+          th { color: #60758a; }
+          .highlight { padding: 14px 16px; border-radius: 12px; background: #edf6fb; border: 1px solid #cfe2ee; margin: 18px 0; }
+        </style>
+      </head>
+      <body>
+        <h1>Relatorio Gerencial de Combustivel</h1>
+        <div class="meta">Gerado em ${new Date().toLocaleString('pt-BR')} | Periodo: ${mesInicio.value || 'inicio livre'} ate ${mesFim.value || 'fim livre'}</div>
+        <div class="summary">
+          <div><span>Total gasto</span><strong>${formatarBRL(total)}</strong></div>
+          <div><span>Responsaveis</span><strong>${new Set(dados.map((item) => item.supervisor)).size}</strong></div>
+          <div><span>Placas</span><strong>${new Set(dados.map((item) => item.placa)).size}</strong></div>
+          <div><span>Lancamentos</span><strong>${dados.length}</strong></div>
+        </div>
+        ${mesMaiorGasto ? `<div class="highlight"><strong>Mes com maior gasto:</strong> ${mesMaiorGasto.nome} com ${formatarBRL(mesMaiorGasto.total)}</div>` : ''}
+        ${destaqueSprinter ? `<div class="highlight"><strong>Sprinter:</strong> ${destaqueSprinter.nome} gastou ${formatarBRL(destaqueSprinter.total)}.</div>` : ''}
+        ${gerarTabelaRelatorio('Total por responsavel', ['Responsavel', 'Total', 'Lancamentos'], porResponsavel.map((linha) => `<tr><td>${linha.nome}</td><td>${formatarBRL(linha.total)}</td><td>${linha.lancamentos}</td></tr>`))}
+        ${gerarTabelaRelatorio('Total por unidade / regiao', ['Unidade', 'Total', 'Lancamentos'], porUnidade.map((linha) => `<tr><td>${linha.nome}</td><td>${formatarBRL(linha.total)}</td><td>${linha.lancamentos}</td></tr>`))}
+        ${gerarTabelaRelatorio('Resumo por combustivel', ['Combustivel', 'Total', 'Lancamentos'], porCombustivel.map((linha) => `<tr><td>${linha.nome}</td><td>${formatarBRL(linha.total)}</td><td>${linha.lancamentos}</td></tr>`))}
+        ${gerarTabelaRelatorio('Top veiculos / placas', ['Veiculo', 'Total', 'Lancamentos'], porVeiculo.map((linha) => `<tr><td>${linha.nome}</td><td>${formatarBRL(linha.total)}</td><td>${linha.lancamentos}</td></tr>`))}
+        ${gerarTabelaRelatorio('Top cidades', ['Cidade', 'Total', 'Lancamentos'], porCidade.map((linha) => `<tr><td>${linha.nome}</td><td>${formatarBRL(linha.total)}</td><td>${linha.lancamentos}</td></tr>`))}
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `relatorio-gerencial-combustivel-${new Date().toISOString().slice(0, 10)}.html`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    atualizarStatusSalvamento('Relatorio gerencial exportado com sucesso.', 'success');
+  }
+
   function resumirVinculoCadastro(dados) {
     if (!resumoCadastro || !resumoCadastro.validos) return '';
     const vinculados = dados.filter((item) => item.origemResponsavel === 'cadastro').length;
@@ -1040,21 +1153,7 @@ window.portalAuth.exigirAutenticacao();
 
   function aplicarFiltros() {
     if (!baseDados.length) return;
-    const unidade = unidadeFiltro.value;
-    const supervisor = supervisorFiltro.value;
-    const placas = obterSelecionados(placaFiltro);
-    const combustiveisSelecionados = obterSelecionados(combustivelFiltro);
-    const inicio = mesInicio.value || '0000-00';
-    const fim = mesFim.value || '9999-12';
-
-    const filtrado = baseDados.filter((item) => {
-      const okUnidade = !unidade || item.unidade === unidade;
-      const okSupervisor = !supervisor || item.supervisor === supervisor;
-      const okPlaca = !placas.length || placas.includes(item.placa);
-      const okCombustivel = !combustiveisSelecionados.length || combustiveisSelecionados.includes(item.combustivel);
-      const okPeriodo = item.mes >= inicio && item.mes <= fim;
-      return okUnidade && okSupervisor && okPlaca && okCombustivel && okPeriodo;
-    });
+    const filtrado = obterDadosFiltradosAtuais();
 
     atualizarCards(filtrado);
     atualizarGraficoMensal(filtrado);
@@ -1274,20 +1373,7 @@ window.portalAuth.exigirAutenticacao();
       atualizarStatusSalvamento('Nao ha dados carregados para exportar.', 'error');
       return;
     }
-    const unidade = unidadeFiltro.value;
-    const supervisor = supervisorFiltro.value;
-    const placas = obterSelecionados(placaFiltro);
-    const combustiveisSelecionados = obterSelecionados(combustivelFiltro);
-    const inicio = mesInicio.value || '0000-00';
-    const fim = mesFim.value || '9999-12';
-    const filtrado = baseDados.filter((item) => {
-      const okUnidade = !unidade || item.unidade === unidade;
-      const okSupervisor = !supervisor || item.supervisor === supervisor;
-      const okPlaca = !placas.length || placas.includes(item.placa);
-      const okCombustivel = !combustiveisSelecionados.length || combustiveisSelecionados.includes(item.combustivel);
-      const okPeriodo = item.mes >= inicio && item.mes <= fim;
-      return okUnidade && okSupervisor && okPlaca && okCombustivel && okPeriodo;
-    }).map((item) => ({
+    const filtrado = obterDadosFiltradosAtuais().map((item) => ({
       unidade: item.unidade,
       responsavel: item.supervisor,
       placa: item.placa,
@@ -1318,6 +1404,7 @@ window.portalAuth.exigirAutenticacao();
     URL.revokeObjectURL(url);
     atualizarStatusSalvamento(`Exportacao concluida com ${filtrado.length} linhas filtradas.`, 'success');
   });
+  document.getElementById('exportarRelatorio').addEventListener('click', exportarRelatorioGerencial);
   unidadeFiltro.addEventListener('change', aplicarFiltros);
   supervisorFiltro.addEventListener('change', aplicarFiltros);
   placaFiltro.addEventListener('change', aplicarFiltros);
