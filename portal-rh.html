@@ -226,25 +226,30 @@ window.portalAuth.exigirAutenticacao();
     `;
   }
 
-  function resolverEndpointRh() {
-    if (window.location.protocol === 'file:') {
-      return 'http://127.0.0.1:8000/api/news/rh';
-    }
-    return `/api/news/rh?_=${Date.now()}`;
-  }
-
   async function carregarNoticiasRh() {
     const status = document.getElementById('statusNoticiasRh');
     const lista = document.getElementById('listaNoticiasRh');
-    const endpoint = resolverEndpointRh();
+    const endpoints = window.portalAuth.resolverEndpointNoticias('rh');
 
     status.textContent = 'Carregando noticias de RH da ultima semana...';
     lista.innerHTML = '<div class="news-empty">Buscando noticias...</div>';
 
     try {
-      const resposta = await fetch(endpoint, { cache: 'no-store' });
-      if (!resposta.ok) throw new Error(`Falha ${resposta.status}`);
-      const dados = await resposta.json();
+      let dados = null;
+      let ultimaFalha = null;
+
+      for (const endpoint of endpoints) {
+        try {
+          const resposta = await fetch(endpoint, { cache: 'no-store' });
+          if (!resposta.ok) throw new Error(`Falha ${resposta.status}`);
+          dados = await resposta.json();
+          break;
+        } catch (erro) {
+          ultimaFalha = erro;
+        }
+      }
+
+      if (!dados) throw ultimaFalha || new Error('Nenhum endpoint respondeu.');
       const artigos = Array.isArray(dados.articles) ? dados.articles : [];
       const aviso = dados.warning ? String(dados.warning) : '';
 
@@ -258,7 +263,7 @@ window.portalAuth.exigirAutenticacao();
       lista.innerHTML = artigos.map(montarCardNoticia).join('');
     } catch (erro) {
       status.textContent = 'Nao foi possivel carregar as noticias agora. Tente novamente em alguns minutos.';
-      lista.innerHTML = '<div class="news-empty">A consulta falhou. Se estiver no site publicado, confirme se as funcoes do Netlify estao ativas. Em uso local, rode o servidor Python.</div>';
+      lista.innerHTML = '<div class="news-empty">A consulta falhou. Verifique se a Edge Function do Supabase esta publicada e se o secret GNEWS_API_KEY esta configurado corretamente.</div>';
       console.error('Erro ao carregar noticias de RH:', erro);
     }
   }

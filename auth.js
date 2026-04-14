@@ -19,6 +19,23 @@ function resolverEmailLogin(login) {
     : `${loginNormalizado}@${PORTAL_LOGIN_EMAIL_DOMAIN}`;
 }
 
+function resolverEndpointNoticias(secao) {
+  const secaoNormalizada = String(secao || "").trim().toLowerCase();
+  const sections = new Set(["home", "ti", "rh"]);
+  if (!sections.has(secaoNormalizada)) {
+    throw new Error("Secao de noticias invalida.");
+  }
+
+  const remoteUrl = `${PORTAL_SUPABASE_URL}/functions/v1/gnews?section=${encodeURIComponent(secaoNormalizada)}&_=${Date.now()}`;
+  const localUrl = `http://127.0.0.1:8000/api/news/${secaoNormalizada}`;
+
+  if (window.location.protocol === "file:") {
+    return [remoteUrl, localUrl];
+  }
+
+  return [remoteUrl];
+}
+
 async function obterSessaoAtual() {
   const { data, error } = await portalSupabase.auth.getSession();
   if (error) throw error;
@@ -73,6 +90,7 @@ window.portalAuth = {
   supabase: portalSupabase,
   normalizarLogin,
   resolverEmailLogin,
+  resolverEndpointNoticias,
   obterSessaoAtual,
   loginPortal,
   exigirAutenticacao,

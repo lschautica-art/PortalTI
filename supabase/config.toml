@@ -1,0 +1,2 @@
+[functions.gnews]
+verify_jwt = false
