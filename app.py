@@ -36,12 +36,13 @@ NEWS_CONFIG = {
     "ti": {
         "path": "/api/news/ti",
         "alt_path": "/.netlify/functions/news-ti",
-        "endpoint": "/top-headlines",
+        "endpoint": "/search",
         "params": {
-            "topic": "technology",
+            "q": '"tecnologia da informacao" OR ciberseguranca OR cloud OR "inteligencia artificial" OR software OR infraestrutura OR dados OR microsoft OR google OR aws OR oracle OR totvs OR erp',
             "lang": "pt",
             "country": "br",
             "max": "6",
+            "sortby": "publishedAt",
         },
     },
     "rh": {
@@ -49,7 +50,7 @@ NEWS_CONFIG = {
         "alt_path": "/.netlify/functions/news-rh",
         "endpoint": "/search",
         "params": {
-            "q": '"recursos humanos" OR "gestao de pessoas" OR recrutamento OR beneficios OR lideranca',
+            "q": '"recursos humanos" OR "gestao de pessoas" OR recrutamento OR selecao OR beneficios OR "clima organizacional" OR "cultura organizacional" OR "trabalho hibrido" OR lideranca OR onboarding',
             "lang": "pt",
             "country": "br",
             "max": "6",
