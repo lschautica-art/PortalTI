@@ -96,14 +96,14 @@
     <h2>Menu</h2>
     <ul>
       <li><a href="portal.html">Portal Inicial</a></li>
-      <li class="menu-label"><span>Area TI</span></li>
-      <li><a href="portal-ti.html">Tecnologia da Informacao</a></li>
+      <li class="menu-label"><span>Área TI</span></li>
+      <li><a href="portal-ti.html">Tecnologia da Informação</a></li>
       <li><a href="dashboard.html">Dashboard TI</a></li>
       <li><a href="dashboard-2026.html">Dashboard TI - 2026</a></li>
       <li><a href="comparativo-anual-2025.html">Comparativo Anual</a></li>
-      <li class="menu-label"><span>Area RH</span></li>
+      <li class="menu-label"><span>Área RH</span></li>
       <li><a href="portal-rh.html" class="active">RH</a></li>
-      <li><a href="Controle de gasolina.html">Controle de combustivel</a></li>
+      <li><a href="Controle de gasolina.html">Controle de combustível</a></li>
       <li><a href="index.html">Sair</a></li>
     </ul>
   </aside>
@@ -126,11 +126,11 @@
 
     <section class="hero">
       <h1>Controles operacionais organizados por area e por equipe</h1>
-      <p>Esta area foi pensada para reunir paineis que acompanham despesas e processos ligados a equipes, supervisores e rotinas operacionais, com uma apresentacao mais institucional e pronta para expansao.</p>
+      <p>Esta area foi pensada para reunir painéis que acompanham despesas e processos ligados a equipes, supervisores e rotinas operacionais, com uma apresentação mais institucional e pronta para expansão.</p>
     </section>
 
     <section class="summary-grid">
-      <article class="summary-card"><span>Modulos ativos</span><strong>1</strong></article>
+      <article class="summary-card"><span>Módulos ativos</span><strong>1</strong></article>
       <article class="summary-card"><span>Escopo</span><strong>RH</strong></article>
       <article class="summary-card"><span>Origem dos dados</span><strong>CSV</strong></article>
       <article class="summary-card"><span>Foco</span><strong>Equipe</strong></article>
@@ -139,33 +139,33 @@
     <section class="news-shell">
       <div class="news-head">
         <div>
-          <h2>Noticias da Semana</h2>
-          <p>Mostre noticias recentes sobre recursos humanos, gestao de pessoas e cultura organizacional para tornar a area mais atual e informativa.</p>
+          <h2>Notícias da Semana</h2>
+          <p>Mostre notícias recentes sobre recursos humanos, gestão de pessoas e cultura organizacional para tornar a area mais atual e informativa.</p>
         </div>
         <div class="news-actions">
-          <button class="news-btn secondary" id="atualizarNoticiasRh" type="button">Atualizar noticias</button>
+          <button class="news-btn secondary" id="atualizarNotíciasRh" type="button">Atualizar notícias</button>
         </div>
       </div>
-      <div class="news-status" id="statusNoticiasRh">Aguardando o backend de noticias responder.</div>
-      <div class="news-grid" id="listaNoticiasRh"></div>
+      <div class="news-status" id="statusNotíciasRh">Aguardando o backend de notícias responder.</div>
+      <div class="news-grid" id="listaNotíciasRh"></div>
     </section>
 
-    <h2 class="section-title">Modulo Disponivel</h2>
+    <h2 class="section-title">Módulo Disponivel</h2>
     <section class="modules-grid">
       <article class="module-card">
         <h3>Controle de gasolina</h3>
-        <p>Dashboard para acompanhar gastos de gasolina por supervisor e vendedor, com filtros por periodo, leitura mensal, ranking por supervisor e tabela detalhada. A estrutura ja esta pronta para receber mais campos e mais controles no futuro.</p>
+        <p>Dashboard para acompanhar gastos de gasolina por supervisor e vendedor, com filtros por período, leitura mensal, ranking por supervisor e tabela detalhada. A estrutura ja está pronta para receber mais campos e mais controles no futuro.</p>
         <a href="Controle de gasolina.html">Abrir controle</a>
       </article>
       <article class="module-card">
-        <h3>Expansao da area</h3>
+        <h3>Expansão da area</h3>
         <p>Este espaco pode receber depois outros acompanhamentos, como ajuda de custo, despesas por equipe, adiantamentos, controle de visitas e indicadores por gestor.</p>
       </article>
     </section>
 
     <section class="roadmap">
-      <strong>Proxima evolucao da area</strong>
-      <p>O padrao visual e a navegacao ja estao preparados para incluir novos modulos operacionais sem perder a organizacao do portal. A tendencia e transformar esta area em uma central de controles mensais por supervisao.</p>
+      <strong>Próxima evolução da area</strong>
+      <p>O padrão visual e a navegação ja estao preparados para incluir novos módulos operacionais sem perder a organizacao do portal. A tendencia e transformar está area em uma central de controles mensais por supervisão.</p>
     </section>
   </main>
 <script>
@@ -191,43 +191,43 @@
     });
   }());
 
-  function formatarDataNoticia(dataIso) {
+  function formatarDataNotícia(dataIso) {
     if (!dataIso) return 'Sem data';
     const data = new Date(dataIso);
     return Number.isNaN(data.getTime()) ? 'Sem data' : data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
-  function resumoNoticia(texto) {
+  function resumoNotícia(texto) {
     const base = String(texto || '').trim();
-    if (!base) return 'Sem resumo disponivel para esta materia.';
+    if (!base) return 'Sem resumo disponivel para está materia.';
     return base.length > 160 ? `${base.slice(0, 157)}...` : base;
   }
 
-  function montarCardNoticia(item) {
+  function montarCardNotícia(item) {
     const imagem = item.image || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80';
     return `
       <article class="news-card">
-        <img src="${imagem}" alt="${item.title || 'Noticia'}" loading="lazy" referrerpolicy="no-referrer">
+        <img src="${imagem}" alt="${item.title || 'Notícia'}" loading="lazy" referrerpolicy="no-referrer">
         <div class="news-card-body">
           <div class="news-meta">
             <span class="news-source">${item.source?.name || 'Fonte externa'}</span>
-            <span>${formatarDataNoticia(item.publishedAt)}</span>
+            <span>${formatarDataNotícia(item.publishedAt)}</span>
           </div>
-          <h3>${item.title || 'Sem titulo'}</h3>
-          <p>${resumoNoticia(item.description)}</p>
+          <h3>${item.title || 'Sem título'}</h3>
+          <p>${resumoNotícia(item.description)}</p>
           <a class="news-link" href="${item.url || '#'}" target="_blank" rel="noopener noreferrer">Ler noticia</a>
         </div>
       </article>
     `;
   }
 
-  async function carregarNoticiasRh() {
-    const status = document.getElementById('statusNoticiasRh');
-    const lista = document.getElementById('listaNoticiasRh');
+  async function carregarNotíciasRh() {
+    const status = document.getElementById('statusNotíciasRh');
+    const lista = document.getElementById('listaNotíciasRh');
     const endpoint = '/api/news/rh';
 
-    status.textContent = 'Carregando noticias de RH da ultima semana...';
-    lista.innerHTML = '<div class="news-empty">Buscando noticias...</div>';
+    status.textContent = 'Carregando notícias de RH da última semana...';
+    lista.innerHTML = '<div class="news-empty">Buscando notícias...</div>';
 
     try {
       const resposta = await fetch(endpoint);
@@ -236,23 +236,23 @@
       const artigos = Array.isArray(dados.articles) ? dados.articles : [];
 
       if (!artigos.length) {
-        status.textContent = 'Nenhuma noticia recente foi encontrada para RH nesta semana.';
+        status.textContent = 'Nenhuma noticia recente foi encontrada para RH nestá semana.';
         lista.innerHTML = '<div class="news-empty">O backend respondeu sem artigos para o filtro atual. Tente novamente mais tarde.</div>';
         return;
       }
 
-      status.textContent = 'Noticias de RH atualizadas com sucesso.';
-      lista.innerHTML = artigos.map(montarCardNoticia).join('');
+      status.textContent = 'Notícias de RH atualizadas com sucesso.';
+      lista.innerHTML = artigos.map(montarCardNotícia).join('');
     } catch (erro) {
-      status.textContent = 'Nao foi possivel carregar as noticias agora. Verifique se o backend Python esta rodando com GNEWS_API_KEY configurada.';
-      lista.innerHTML = '<div class="news-empty">A consulta falhou. Inicie o servidor Python e defina a chave da GNews no backend para liberar esta area.</div>';
-      console.error('Erro ao carregar noticias de RH:', erro);
+      status.textContent = 'Não foi possível carregar as notícias agora. Verifique se o backend Python está rodando com GNEWS_API_KEY configurada.';
+      lista.innerHTML = '<div class="news-empty">A consulta falhou. Inicie o servidor Python e defina a chave da GNews no backend para liberar está area.</div>';
+      console.error('Erro ao carregar notícias de RH:', erro);
     }
   }
 
-  document.getElementById('atualizarNoticiasRh').addEventListener('click', carregarNoticiasRh);
+  document.getElementById('atualizarNotíciasRh').addEventListener('click', carregarNotíciasRh);
 
-  carregarNoticiasRh();
+  carregarNotíciasRh();
 </script>
 </body>
 </html>

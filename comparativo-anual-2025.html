@@ -117,7 +117,7 @@
     text-transform: uppercase;
   }
 
-  /* Conteúdo principal */
+  /* ConteÃºdo principal */
   #mainContent {
     margin-left: 240px;
     padding: 20px;
@@ -183,7 +183,7 @@
     margin:0;
   }
 
-  /* Container do gráfico */
+  /* Container do grÃ¡fico */
   .grafico-container {
     background: white;
     border-radius: 15px;
@@ -235,19 +235,19 @@
   <h2>Menu</h2>
   <ul>
     <li><a href="portal.html">Portal Inicial</a></li>
-    <li class="menu-label"><span>Area TI</span></li>
-    <li><a href="portal-ti.html">Tecnologia da Informacao</a></li>
+    <li class="menu-label"><span>Área TI</span></li>
+    <li><a href="portal-ti.html">Tecnologia da Informação</a></li>
     <li><a href="dashboard.html">Dashboard TI</a></li>
     <li><a href="dashboard-2026.html">Dashboard TI - 2026</a></li>
     <li><a href="comparativo-anual-2025.html" class="active">Comparativo Anual</a></li>
-    <li class="menu-label"><span>Area RH</span></li>
+    <li class="menu-label"><span>Área RH</span></li>
     <li><a href="portal-rh.html">RH</a></li>
-    <li><a href="Controle de gasolina.html">Controle de combustivel</a></li>
+    <li><a href="Controle de gasolina.html">Controle de combustível</a></li>
     <li><a href="index.html">Sair</a></li>
   </ul>
 </aside>
 
-<!-- Conteúdo principal -->
+<!-- ConteÃºdo principal -->
 <div id="mainContent">
   <div class="mobile-topbar">
     <button class="menu-toggle" id="menuToggle" type="button">Menu</button>
@@ -255,7 +255,7 @@
   </div>
   <h1>Comparativo Anual de Gastos</h1>
 
-  <!-- filtros padrão -->
+  <!-- filtros padrÃ£o -->
   <div class="filtros-row">
     <label for="anoFiltro">Comparar anos:</label>
     <select id="anoFiltro">
@@ -264,11 +264,11 @@
       <option value="2025-2026">2025 x 2026</option>
     </select>
 
-    <label for="mesFiltro">Comparar até o mês:</label>
+    <label for="mesFiltro">Comparar atÃ© o mÃªs:</label>
     <select id="mesFiltro">
       <option>Janeiro</option>
       <option>Fevereiro</option>
-      <option>Março</option>
+      <option>MarÃ§o</option>
       <option>Abril</option>
       <option>Maio</option>
       <option>Junho</option>
@@ -281,29 +281,29 @@
     </select>
   </div>
 
-  <!-- Totais anuais (ATÉ O MÊS SELECIONADO) -->
+  <!-- Totais anuais (ATÃ‰ O MÃŠS SELECIONADO) -->
   <div id="cardsResumo">
     <div class="card">
-      <h3 id="tituloTotal1">Total Ano 1</h3>
+      <h3 id="títuloTotal1">Total Ano 1</h3>
       <p id="totalAno1">Carregando...</p>
     </div>
 
     <div class="card">
-      <h3 id="tituloTotal2">Total Ano 2</h3>
+      <h3 id="títuloTotal2">Total Ano 2</h3>
       <p id="totalAno2">Carregando...</p>
     </div>
 
     <div class="card">
-      <h3>Variação (até o mês)</h3>
+      <h3>VariaÃ§Ã£o (atÃ© o mÃªs)</h3>
       <p id="variacaoTotal">Carregando...</p>
     </div>
   </div>
 
-  <!-- Diferença percentual mensal -->
-  <h2>Diferença Percentual Mensal (até o mês selecionado)</h2>
+  <!-- DiferenÃ§a percentual mensal -->
+  <h2>DiferenÃ§a Percentual Mensal (atÃ© o mÃªs selecionado)</h2>
   <div id="cardsDiferenca"></div>
 
-  <!-- Gráficos separados -->
+  <!-- GrÃ¡ficos separados -->
   <div class="grafico-container">
     <h3 id="labelGraf1">Gasto Ano 1</h3>
     <canvas id="graficoAno1"></canvas>
@@ -323,7 +323,7 @@ const anosDisponiveis = {
   '2026': 'dados2026.csv'
 };
 
-const mesesOrdem = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+const mesesOrdem = ['Janeiro','Fevereiro','MarÃ§o','Abril','Maio','Junho',
                     'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 let dadosCSV = {}; // cache { '2024': {totaisPorMes: {...}, totalAno: n}, ... }
@@ -342,18 +342,18 @@ function carregarCSV(ano) {
     if (dadosCSV[ano]) return resolve(dadosCSV[ano]);
     const path = anosDisponiveis[String(ano)];
     if (!path) {
-      // se não existir CSV para o ano, retorna zeros
+      // se nÃ£o existir CSV para o ano, retorna zeros
       dadosCSV[ano] = { totaisPorMes: {}, totalAno: 0 };
       return resolve(dadosCSV[ano]);
     }
     Papa.parse(path, {
       download: true, header: true, skipEmptyLines: true,
       complete: function(results) {
-        const dados = results.data.filter(item => item.Mês && item.Valor);
+        const dados = results.data.filter(item => item.MÃªs && item.Valor);
         const totaisPorMes = {};
         let totalAno = 0;
         dados.forEach(item => {
-          const mes = item.Mês.trim();
+          const mes = item.MÃªs.trim();
           let valorStr = String(item.Valor || '').replace(/^R\$ ?/, '').replace(/[^0-9,\,\.]/g,'').replace(',', '.');
           const valor = parseFloat(valorStr);
           if (isNaN(valor)) return;
@@ -367,8 +367,8 @@ function carregarCSV(ano) {
   });
 }
 
-// cria chart a partir de labels e valores (arrays), mantém estilo parecido
-function criarGraficoArray(canvasId, labels, valores, titulo, graficoAtualSetter) {
+// cria chart a partir de labels e valores (arrays), mantÃ©m estilo parecido
+function criarGraficoArray(canvasId, labels, valores, título, graficoAtualSetter) {
   const ctx = document.getElementById(canvasId).getContext('2d');
   if (graficoAtualSetter.ref) graficoAtualSetter.ref.destroy();
 
@@ -377,7 +377,7 @@ function criarGraficoArray(canvasId, labels, valores, titulo, graficoAtualSetter
     data: {
       labels: labels,
       datasets: [{
-        label: titulo,
+        label: título,
         data: valores,
         backgroundColor: '#073954',
         borderRadius: 6
@@ -409,7 +409,7 @@ function criarGraficoArray(canvasId, labels, valores, titulo, graficoAtualSetter
           title: { display: true, text: 'Valor (R$)', color: '#073954', font: { size: 14, weight: 'bold' } }
         },
         x: {
-          title: { display: true, text: 'Mês', color: '#073954', font: { size: 14, weight: 'bold' } }
+          title: { display: true, text: 'MÃªs', color: '#073954', font: { size: 14, weight: 'bold' } }
         }
       }
     },
@@ -417,7 +417,7 @@ function criarGraficoArray(canvasId, labels, valores, titulo, graficoAtualSetter
   });
 }
 
-// constrói sequência de nomes de meses de inicio até fim (cíclico)
+// constrÃ³i sequÃªncia de nomes de meses de inicio atÃ© fim (cÃ­clico)
 function construirSequenciaMeses(mInicio, mFim) {
   const idxStart = mesesOrdem.indexOf(mInicio);
   const idxEnd = mesesOrdem.indexOf(mFim);
@@ -436,7 +436,7 @@ function ordenarMeses(meses) {
   return meses.sort((a,b) => mesesOrdem.indexOf(a) - mesesOrdem.indexOf(b));
 }
 
-// função principal: atualiza tudo conforme o filtro de ano e mês (sem modo personalizado)
+// funÃ§Ã£o principal: atualiza tudo conforme o filtro de ano e mÃªs (sem modo personalizado)
 async function atualizarComparativo() {
   const [a1, a2] = String(anoFiltro.value).split('-');
   const mesLimite = mesFiltro.value;
@@ -444,27 +444,27 @@ async function atualizarComparativo() {
   const d1 = await carregarCSV(a1);
   const d2 = await carregarCSV(a2);
 
-  // sequencia de meses de janeiro até mesLimite (inclusive)
+  // sequencia de meses de janeiro atÃ© mesLimite (inclusive)
   const seq = mesesOrdem.slice(0, mesesOrdem.indexOf(mesLimite) + 1);
 
-  // totais até mesLimite por ano
+  // totais atÃ© mesLimite por ano
   const totalAno1Mes = seq.reduce((s,mes)=> s + (d1.totaisPorMes[mes] || 0), 0);
   const totalAno2Mes = seq.reduce((s,mes)=> s + (d2.totaisPorMes[mes] || 0), 0);
 
-  // atualizar títulos e valores dos cards (mostrando que é até o mês)
-  document.getElementById('tituloTotal1').textContent = `Total ${a1} (até ${mesLimite})`;
+  // atualizar tÃ­tulos e valores dos cards (mostrando que Ã© atÃ© o mÃªs)
+  document.getElementById('títuloTotal1').textContent = `Total ${a1} (atÃ© ${mesLimite})`;
   document.getElementById('totalAno1').textContent = formatarBRL(totalAno1Mes);
 
-  document.getElementById('tituloTotal2').textContent = `Total ${a2} (até ${mesLimite})`;
+  document.getElementById('títuloTotal2').textContent = `Total ${a2} (atÃ© ${mesLimite})`;
   document.getElementById('totalAno2').textContent = formatarBRL(totalAno2Mes);
 
-  // Variação total (até o mês)
-  let diffTotal = 0, simboloTotal = '→';
-  if (totalAno1Mes > 0) { diffTotal = ((totalAno2Mes - totalAno1Mes) / totalAno1Mes) * 100; simboloTotal = diffTotal>0?'↑':diffTotal<0?'↓':'→'; }
+  // VariaÃ§Ã£o total (atÃ© o mÃªs)
+  let diffTotal = 0, simboloTotal = 'â†’';
+  if (totalAno1Mes > 0) { diffTotal = ((totalAno2Mes - totalAno1Mes) / totalAno1Mes) * 100; simboloTotal = diffTotal>0?'â†‘':diffTotal<0?'â†“':'â†’'; }
   const corTotal = diffTotal >0 ? 'var(--red)' : diffTotal<0 ? 'var(--green)' : 'var(--primary)';
   document.getElementById('variacaoTotal').innerHTML = `<span style="color:${corTotal}">${simboloTotal} ${Math.abs(diffTotal).toFixed(1)}%</span>`;
 
-  // Diferença mensal (cards) — somente meses até mesLimite
+  // DiferenÃ§a mensal (cards) â€” somente meses atÃ© mesLimite
   const mesesCombinados = ordenarMeses(Array.from(new Set([...Object.keys(d1.totaisPorMes), ...Object.keys(d2.totaisPorMes), ...seq])))
                             .filter(m => mesesOrdem.indexOf(m) <= mesesOrdem.indexOf(mesLimite));
   const containerDiff = document.getElementById('cardsDiferenca');
@@ -472,17 +472,17 @@ async function atualizarComparativo() {
   mesesCombinados.forEach(mes => {
     const v1 = d1.totaisPorMes[mes] || 0;
     const v2 = d2.totaisPorMes[mes] || 0;
-    let diff = 0, simbolo = '→';
-    if (v1>0) { diff = ((v2-v1)/v1)*100; simbolo = diff>0?'↑':diff<0?'↓':'→'; }
+    let diff = 0, simbolo = 'â†’';
+    if (v1>0) { diff = ((v2-v1)/v1)*100; simbolo = diff>0?'â†‘':diff<0?'â†“':'â†’'; }
     const cor = diff>0 ? 'var(--red)' : diff<0 ? 'var(--green)' : 'var(--primary)';
     const card = document.createElement('div'); card.classList.add('card');
     card.innerHTML = `<h3>${mes}</h3><p style="color:${cor}">${simbolo} ${Math.abs(diff).toFixed(1)}%</p>`;
     containerDiff.appendChild(card);
   });
 
-  // gráficos: labels = mesesCombinados, datasets separados por ano (valores até mesLimite)
-  document.getElementById('labelGraf1').textContent = `Gasto ${a1} (até ${mesLimite})`;
-  document.getElementById('labelGraf2').textContent = `Gasto ${a2} (até ${mesLimite})`;
+  // grÃ¡ficos: labels = mesesCombinados, datasets separados por ano (valores atÃ© mesLimite)
+  document.getElementById('labelGraf1').textContent = `Gasto ${a1} (atÃ© ${mesLimite})`;
+  document.getElementById('labelGraf2').textContent = `Gasto ${a2} (atÃ© ${mesLimite})`;
   const valores1 = mesesCombinados.map(m => d1.totaisPorMes[m] || 0);
   const valores2 = mesesCombinados.map(m => d2.totaisPorMes[m] || 0);
   criarGraficoArray('graficoAno1', mesesCombinados, valores1, `Gasto ${a1}`, { get ref(){return chart1}, set ref(v){chart1=v} });
