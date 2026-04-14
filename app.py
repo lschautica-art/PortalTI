@@ -64,7 +64,7 @@ NEWS_CONFIG = {
         "alt_path": "/.netlify/functions/news-comercial",
         "endpoint": "/search",
         "params": {
-            "q": 'vendas OR comercial OR "forca de vendas" OR clientes OR negociacao OR prospeccao OR prospecção OR "expansao de mercado" OR faturamento',
+            "q": '"gestao comercial" OR "equipe comercial" OR vendedores OR "funil de vendas" OR "metas de vendas" OR prospeccao OR "geracao de leads" OR crm OR "relacionamento com clientes" OR "resultado comercial" OR faturamento',
             "lang": "pt",
             "country": "br",
             "max": "6",
