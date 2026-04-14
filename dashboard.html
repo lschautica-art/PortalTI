@@ -84,8 +84,8 @@
   #notasContainer textarea::placeholder { color:#aaa; }
 
   /* Responsivo */
-  @media(max-width:900px){ body { display:block; } #sidebar{width:min(300px,82vw);height:100vh;transform:translateX(-100%);} body.sidebar-open #sidebar { transform:translateX(0); } body.sidebar-open .sidebar-backdrop { opacity:1; pointer-events:auto; } #mainContent{margin-left:0;width:100%;padding:18px 16px 24px;} .mobile-topbar { display:flex; } .theme-toggle { position:static; display:block; width:100%; margin:0 0 16px; } .grafico canvas{height:320px;} .resumo-cards{grid-template-columns:repeat(2, minmax(0, 1fr));} .filtros { flex-direction:column; align-items:stretch; } select,input[type=month],#fornecedorFiltro { width:100%; min-width:0; } #pizzaContainer { height:420px; } }
-  @media(max-width:640px){ #mainContent { padding:14px; } .resumo-cards { grid-template-columns:1fr; gap:12px; } .card { padding:14px 16px; } .card strong { font-size: clamp(1.2rem, 6vw, 1.6rem); } .card span { font-size: 0.9rem; } .grafico { margin-bottom:32px; } .grafico h3 { font-size:1.25rem; } .grafico canvas { height:260px; } #pizzaContainer { height:320px; margin-bottom:28px; } }
+  @media(max-width:900px){ body { display:block; } #sidebar{width:min(300px,82vw);height:100vh;transform:translateX(-100%);} body.sidebar-open #sidebar { transform:translateX(0); } body.sidebar-open .sidebar-backdrop { opacity:1; pointer-events:auto; } #mainContent{margin-left:0;width:100%;padding:18px 16px 24px;} .mobile-topbar { display:flex; } .theme-toggle { position:static; display:block; width:100%; margin:0 0 16px; } .grafico canvas{height:320px;} .resumo-cards{grid-template-columns:repeat(2, minmax(0, 1fr));} .filtros { flex-direction:column; align-items:stretch; } select,input[type=month],#fornecedorFiltro { width:100%; min-width:0; } #fornecedorFiltro { height: 132px; } #pizzaContainer { height:420px; } }
+  @media(max-width:640px){ #mainContent { padding:14px; } .resumo-cards { grid-template-columns:1fr; gap:12px; } .card { padding:14px 16px; } .card strong { font-size: clamp(1.2rem, 6vw, 1.6rem); } .card span { font-size: 0.9rem; } .grafico { margin-bottom:32px; } .grafico h3 { font-size:1.25rem; } .grafico canvas { height:260px; } #fornecedorFiltro { height: 112px; font-size: 0.95rem; } input[type=month] { font-size: 0.95rem; } #pizzaContainer { height:320px; margin-bottom:28px; } }
 </style>
 </head>
 <body>
@@ -361,6 +361,10 @@
     return meses.filter(m => m >= inicio && m <= fim);
   }
 
+  function telaPequena() {
+    return window.innerWidth <= 640;
+  }
+
   // Cria gráficos
   function criarGraficos() {
     const container = document.getElementById('graficosContainer');
@@ -454,18 +458,21 @@ const chartBar = new Chart(ctxBar, {
   },
   options: {
     responsive: true,
+    maintainAspectRatio: false,
     animation: { duration: 800 },
     layout: {
       padding: {
-        top: 10
+        top: telaPequena() ? 0 : 10
       }
     },
     plugins: {
       legend: { labels: { usePointStyle: true } },
       datalabels: {
+        display: context => !telaPequena() && context.dataset.label === 'Gastos (R$)',
         anchor: 'end',
         align: 'end',
         color: '#fb3f3a',
+        clamp: true,
         font: { weight: 'bold', size: 15 },
         formatter: v => formatarBRL(v)
       },
@@ -480,6 +487,14 @@ const chartBar = new Chart(ctxBar, {
       }
     },
     scales: {
+      x: {
+        ticks: {
+          maxRotation: telaPequena() ? 45 : 0,
+          minRotation: telaPequena() ? 45 : 0,
+          autoSkip: true,
+          maxTicksLimit: telaPequena() ? 6 : 12
+        }
+      },
       y: {
         beginAtZero: true,
         max: maxEixoY,
