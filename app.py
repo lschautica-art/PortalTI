@@ -35,6 +35,7 @@ GNEWS_BASE_URL = "https://gnews.io/api/v4"
 NEWS_CONFIG = {
     "ti": {
         "path": "/api/news/ti",
+        "alt_path": "/.netlify/functions/news-ti",
         "endpoint": "/top-headlines",
         "params": {
             "topic": "technology",
@@ -45,6 +46,7 @@ NEWS_CONFIG = {
     },
     "rh": {
         "path": "/api/news/rh",
+        "alt_path": "/.netlify/functions/news-rh",
         "endpoint": "/search",
         "params": {
             "q": '"recursos humanos" OR "gestao de pessoas" OR recrutamento OR beneficios OR lideranca',
@@ -118,8 +120,15 @@ class PortalHandler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         route = parsed.path.rstrip("/") or "/"
 
-        if route in (NEWS_CONFIG["ti"]["path"], NEWS_CONFIG["rh"]["path"]):
-            section = "ti" if route.endswith("/ti") else "rh"
+        valid_paths = {
+            NEWS_CONFIG["ti"]["path"]: "ti",
+            NEWS_CONFIG["ti"]["alt_path"]: "ti",
+            NEWS_CONFIG["rh"]["path"]: "rh",
+            NEWS_CONFIG["rh"]["alt_path"]: "rh",
+        }
+
+        if route in valid_paths:
+            section = valid_paths[route]
             status, payload = fetch_news(section)
             body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
             self.send_response(status)
