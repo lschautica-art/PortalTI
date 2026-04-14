@@ -14,6 +14,7 @@
   /* Reset e básicos */
   * { box-sizing: border-box; }
   body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); transition: background-color 0.3s, color 0.3s; }
+  body.sidebar-open { overflow: hidden; }
   :root {
     --bg: #f9f9f9;
     --text: #222;
@@ -29,7 +30,7 @@
 
   /* Layout sidebar + conteúdo */
   body { display: flex; }
-  #sidebar { width: 240px; background: linear-gradient(180deg, #073954 0%, #0b2e47 100%); color: white; height: 100vh; position: fixed; top: 0; left: 0; padding: 24px 18px; box-sizing: border-box; overflow-y: auto; box-shadow: inset -1px 0 0 rgba(255,255,255,0.08); }
+  #sidebar { width: 240px; background: linear-gradient(180deg, #073954 0%, #0b2e47 100%); color: white; height: 100vh; position: fixed; top: 0; left: 0; padding: 24px 18px; box-sizing: border-box; overflow-y: auto; box-shadow: inset -1px 0 0 rgba(255,255,255,0.08); z-index: 30; transition: transform 0.28s ease; }
   .sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 6px 8px 18px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.12); }
   .sidebar-brand img { width: 62px; height: auto; object-fit: contain; }
   .sidebar-brand-text strong { display: block; font-size: 1rem; margin-bottom: 4px; }
@@ -42,6 +43,10 @@
   #sidebar .menu-label { margin-top: 16px; }
   #sidebar .menu-label span { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.78); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
   #mainContent { margin-left: 240px; padding: 20px; width: calc(100% - 240px); }
+  .mobile-topbar { display: none; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+  .mobile-topbar strong { color: var(--primary); font-size: 1rem; }
+  .menu-toggle { border: none; border-radius: 14px; background: var(--primary); color: white; padding: 12px 16px; font-weight: 700; cursor: pointer; box-shadow: 0 12px 24px rgba(7, 57, 84, 0.16); }
+  .sidebar-backdrop { position: fixed; inset: 0; background: rgba(7, 23, 36, 0.45); opacity: 0; pointer-events: none; transition: opacity 0.28s ease; z-index: 20; }
 
   /* Botão tema */
   .theme-toggle { position: fixed; top: 15px; right: 15px; background: var(--secondary); border: none; color: white; padding: 10px 18px; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px rgba(251,63,58,0.6); z-index: 100; }
@@ -55,6 +60,7 @@
   /* Filtros */
   .filtros { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 20px; margin-bottom: 30px; }
   select,input[type=month] { padding: 8px 12px; border-radius: 25px; border: 2px solid var(--secondary); font-size: 1rem; min-width: 160px; cursor: pointer; background: var(--card-bg); color: var(--text); transition: background-color 0.3s,color 0.3s; }
+  #fornecedorFiltro { min-width: 260px; max-width: 100%; }
   select:hover,input[type=month]:hover { background: var(--secondary); color:white; }
   select:focus,input[type=month]:focus { outline:none; border-color: var(--primary); }
 
@@ -77,10 +83,12 @@
   #notasContainer textarea::placeholder { color:#aaa; }
 
   /* Responsivo */
-  @media(max-width:900px){ .grafico canvas{height:320px;} .resumo-cards{flex-direction:column;align-items:center;} #mainContent{margin-left:0;width:100%;} #sidebar{position:relative;width:100%;height:auto;} }
+  @media(max-width:900px){ body { display:block; } #sidebar{width:min(300px,82vw);height:100vh;transform:translateX(-100%);} body.sidebar-open #sidebar { transform:translateX(0); } body.sidebar-open .sidebar-backdrop { opacity:1; pointer-events:auto; } #mainContent{margin-left:0;width:100%;padding:18px 16px 24px;} .mobile-topbar { display:flex; } .theme-toggle { position:static; display:block; width:100%; margin:0 0 16px; } .grafico canvas{height:320px;} .resumo-cards{flex-direction:column;align-items:stretch;} .filtros { flex-direction:column; align-items:stretch; } select,input[type=month],#fornecedorFiltro { width:100%; min-width:0; } #pizzaContainer { height:420px; } }
+  @media(max-width:640px){ #mainContent { padding:14px; } .card { padding:14px 16px; } .grafico { margin-bottom:32px; } .grafico h3 { font-size:1.25rem; } .grafico canvas { height:260px; } #pizzaContainer { height:320px; margin-bottom:28px; } }
 </style>
 </head>
 <body>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
 <div id="sidebar">
   <div class="sidebar-brand">
@@ -106,6 +114,10 @@
 </div>
 
 <div id="mainContent">
+  <div class="mobile-topbar">
+    <button class="menu-toggle" id="menuToggle" type="button">Menu</button>
+    <strong>Dashboard TI</strong>
+  </div>
   <button class="theme-toggle" id="themeToggle">Modo Escuro</button>
 
   <h1>Dashboard Completo - Gastos TI</h1>
@@ -128,6 +140,28 @@
 
 
 <script>
+  (function () {
+    const body = document.body;
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+    function fecharMenu() {
+      body.classList.remove('sidebar-open');
+    }
+
+    if (menuToggle) {
+      menuToggle.addEventListener('click', () => body.classList.toggle('sidebar-open'));
+    }
+
+    if (sidebarBackdrop) {
+      sidebarBackdrop.addEventListener('click', fecharMenu);
+    }
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 900) fecharMenu();
+    });
+  }());
+
   // Mantive seu JS original, apenas ajustei:
   // 1) Gráfico anual usa só cor azul (#073954)
   // 2) Labels BRL acima da barra (datalabels)
