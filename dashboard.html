@@ -68,7 +68,7 @@
   /* Gráficos */
   .grafico { margin-bottom: 45px; }
   .grafico h3 { font-size:1.8rem; font-weight:bold; text-align:center; margin-bottom:10px; color:var(--primary); }
-  .grafico canvas { max-width:100%; height:600px; border-radius:8px; box-shadow:0 3px 8px rgba(0,0,0,0.12); display:inline-block; }
+  .grafico canvas { width:100% !important; height:420px !important; border-radius:8px; box-shadow:0 3px 8px rgba(0,0,0,0.12); display:block; }
 
   /* Gráfico anual maior */
   #pizzaContainer { width:100%; max-width:100%; height:700px; margin:0 auto 40px auto; }
@@ -84,8 +84,8 @@
   #notasContainer textarea::placeholder { color:#aaa; }
 
   /* Responsivo */
-  @media(max-width:900px){ body { display:block; } #sidebar{width:min(300px,82vw);height:100vh;transform:translateX(-100%);} body.sidebar-open #sidebar { transform:translateX(0); } body.sidebar-open .sidebar-backdrop { opacity:1; pointer-events:auto; } #mainContent{margin-left:0;width:100%;padding:18px 16px 24px;} .mobile-topbar { display:flex; } .theme-toggle { position:static; display:block; width:100%; margin:0 0 16px; } .grafico canvas{height:320px;} .resumo-cards{grid-template-columns:repeat(2, minmax(0, 1fr));} .filtros { flex-direction:column; align-items:stretch; } select,input[type=month],#fornecedorFiltro { width:100%; min-width:0; } #fornecedorFiltro { height: 132px; } #pizzaContainer { height:420px; } }
-  @media(max-width:640px){ #mainContent { padding:14px; } .resumo-cards { grid-template-columns:1fr; gap:12px; } .card { padding:14px 16px; } .card strong { font-size: clamp(1.2rem, 6vw, 1.6rem); } .card span { font-size: 0.9rem; } .grafico { margin-bottom:32px; } .grafico h3 { font-size:1.25rem; } .grafico canvas { height:260px; } #fornecedorFiltro { height: 112px; font-size: 0.95rem; } input[type=month] { font-size: 0.95rem; } #pizzaContainer { height:320px; margin-bottom:28px; } }
+  @media(max-width:900px){ body { display:block; } #sidebar{width:min(300px,82vw);height:100vh;transform:translateX(-100%);} body.sidebar-open #sidebar { transform:translateX(0); } body.sidebar-open .sidebar-backdrop { opacity:1; pointer-events:auto; } #mainContent{margin-left:0;width:100%;padding:18px 16px 24px;} .mobile-topbar { display:flex; } .theme-toggle { position:static; display:block; width:100%; margin:0 0 16px; } .grafico canvas{height:320px !important;} .resumo-cards{grid-template-columns:repeat(2, minmax(0, 1fr));} .filtros { flex-direction:column; align-items:stretch; } select,input[type=month],#fornecedorFiltro { width:100%; min-width:0; } #fornecedorFiltro { height: 132px; } #pizzaContainer { height:420px; } }
+  @media(max-width:640px){ #mainContent { padding:14px; } .resumo-cards { grid-template-columns:1fr; gap:12px; } .card { padding:14px 16px; } .card strong { font-size: clamp(1.2rem, 6vw, 1.6rem); } .card span { font-size: 0.9rem; } .grafico { margin-bottom:32px; } .grafico h3 { font-size:1.25rem; } .grafico canvas { height:260px !important; } #fornecedorFiltro { height: 112px; font-size: 0.95rem; } input[type=month] { font-size: 0.95rem; } #pizzaContainer { height:320px; margin-bottom:28px; } }
 </style>
 </head>
 <body>
@@ -170,12 +170,7 @@
 
   // (TODO: incluir todo o seu JS atual daqui, sem alteração, mantendo funções: carregarDados, criarResumo, criarGraficos, criarGraficoPorFornecedor, notas, toggleTema etc.)
 
-</script>
-
-</body>
-</html>
-
-<script>
+  // Continuidade do script principal do dashboard.
   // Metas personalizadas por fornecedor - EDITE AQUI para mudar metas
   const metasPorFornecedor = {
     "FLUIDATA": 811.23,
@@ -218,8 +213,6 @@
   let fornecedores = [];
   let mesesOrdenados = [];
   let charts = {};
-  let pizzaChart = null;
-  let notas = {}; // notas por fornecedor
 
   // Função para formatar moeda BRL
   function formatarBRL(valor) {
@@ -267,8 +260,6 @@
         preencherFiltros();
         criarResumo();
         criarGraficos();
-        criarGraficoPorFornecedor();
-        carregarNotas();
       },
       error: function(err) {
         console.error('Erro ao carregar CSV:', err);
@@ -459,7 +450,7 @@ const chartBar = new Chart(ctxBar, {
   options: {
     responsive: true,
     maintainAspectRatio: false,
-    animation: { duration: 800 },
+    animation: { duration: 250 },
     layout: {
       padding: {
         top: telaPequena() ? 0 : 10
@@ -536,47 +527,6 @@ const chartBar = new Chart(ctxBar, {
   // Criar gráfico pizza de proporção anual
   // Cria gráfico de barras mostrando total por fornecedor
 // Cria gráfico anual de barras (substitui gráfico de pizza)
-function criarGraficoPorFornecedor() {
-  const ctx = document.getElementById('pizzaChart').getContext('2d');
-  if (pizzaChart) pizzaChart.destroy();
-
-  const labels = fornecedores;
-  const data = fornecedores.map(f => {
-    const valores = Object.values(dadosPorFornecedor[f] || {});
-    return valores.reduce((a, b) => a + b, 0);
-  });
-
-  const metaGeral = 56431.90;
-
-  const maxValor = Math.max(...data);
-  const maxEixoY = Math.max(maxValor, metaGeral) * 1.1;
-
-  pizzaChart = new Chart(ctx, {
-    data: {
-      labels,
-      datasets: [
-        {
-          type: 'bar',
-          label: 'Total por Fornecedor (R$)',
-          data,
-          backgroundColor: '#073954',
-          borderColor: '#073954',
-          borderWidth: 1,
-          borderRadius: 4,
-          order: 2,
-        },
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 800 },
-      plugins: { legend: { labels: { usePointStyle: true } } },
-      scales: { y: { beginAtZero: true, max: maxEixoY } }
-    },
-    plugins: [ChartDataLabels]
-  });
-}
  
   // Atualizar gráficos quando filtros mudam
   function ativarFiltros() {

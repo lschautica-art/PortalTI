@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portal RH</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<script>
+window.portalAuth.exigirAutenticacao();
+</script>
 <style>
   :root {
     --bg: #f4f7fb;
@@ -104,7 +109,7 @@
       <li class="menu-label"><span>Area RH</span></li>
       <li><a href="portal-rh.html" class="active">RH</a></li>
       <li><a href="Controle de gasolina.html">Controle de combustivel</a></li>
-      <li><a href="index.html">Sair</a></li>
+      <li><a href="index.html" data-logout-link>Sair</a></li>
     </ul>
   </aside>
 
@@ -259,7 +264,7 @@
   }
 
   document.getElementById('atualizarNoticiasRh').addEventListener('click', carregarNoticiasRh);
-
+  window.portalAuth.ativarLinksLogout();
   carregarNoticiasRh();
 </script>
 </body>

@@ -268,6 +268,8 @@
   @media(max-width:400px){ .login-container{width:90%; padding:30px 20px;} .login-container h2{font-size:1.8rem;} }
 </style>
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
 </head>
 <body>
   <div class="background-grid" aria-hidden="true"></div>
@@ -323,7 +325,7 @@
         <h2>Login - Gastos TI</h2>
       <div class="input-group">
         <i class="fas fa-user"></i>
-        <input type="text" id="usuario" placeholder="Digite seu usuário" autocomplete="off" />
+        <input type="text" id="usuario" placeholder="Digite seu usuario ou e-mail" autocomplete="off" />
       </div>
       <div class="input-group">
         <i class="fas fa-lock"></i>
@@ -359,13 +361,24 @@
     inputSenha.classList.remove('error');
   }
 
-  function fazerLogin(){
+  async function redirecionarSeJaAutenticado() {
+    try {
+      const sessao = await window.portalAuth.obterSessaoAtual();
+      if (sessao) {
+        window.location.href = 'portal.html';
+      }
+    } catch (erro) {
+      console.error('Nao foi possivel validar a sessao existente:', erro);
+    }
+  }
+
+  async function fazerLogin(){
     limparMensagens();
-    const usuario = inputUsuario.value.trim().toLowerCase();
+    const usuario = window.portalAuth.normalizarLogin(inputUsuario.value);
     const senha = inputSenha.value.trim();
 
     if(!usuario || !senha){
-      mostrarErro("Preencha usuário e senha.");
+      mostrarErro("Preencha usuario e senha.");
       if(!usuario) inputUsuario.classList.add('error');
       if(!senha) inputSenha.classList.add('error');
       return;
@@ -374,30 +387,20 @@
     btnLogin.textContent = "Entrando...";
     btnLogin.disabled = true;
 
-    setTimeout(() => {
-      const usuariosFixos = {
-        lauro: 'DC@dist99',
-        marco: 'DC@dist99',
-        natan: 'DC@dist99',
-        luis: 'DC@dist99',
-        cesar: 'DC@dist99',
-        thiago: 'Dcondor99'
-      };
-
-      if(usuariosFixos[usuario] && usuariosFixos[usuario] === senha){
-        sessionStorage.setItem('portalUsuarioLogado', usuario);
-        mostrarSucesso(`Bem-vindo, ${usuario}!`);
-        setTimeout(() => {
-          window.location.href = 'portal.html';
-        }, 1200);
-      } else {
-        mostrarErro("Usuário ou senha incorretos.");
-        btnLogin.textContent = "Entrar";
-        btnLogin.disabled = false;
-        inputUsuario.classList.add('error');
-        inputSenha.classList.add('error');
-      }
-    }, 600);
+    try {
+      await window.portalAuth.loginPortal(usuario, senha);
+      mostrarSucesso(`Bem-vindo, ${usuario}!`);
+      setTimeout(() => {
+        window.location.href = 'portal.html';
+      }, 900);
+    } catch (erro) {
+      mostrarErro("Usuario, e-mail ou senha incorretos.");
+      btnLogin.textContent = "Entrar";
+      btnLogin.disabled = false;
+      inputUsuario.classList.add('error');
+      inputSenha.classList.add('error');
+      console.error('Erro ao autenticar no Supabase:', erro);
+    }
   }
 
   document.addEventListener('keydown', e => {
@@ -405,6 +408,8 @@
       fazerLogin();
     }
   });
+
+  redirecionarSeJaAutenticado();
 </script>
 </body>
 </html>
