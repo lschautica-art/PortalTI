@@ -18,14 +18,18 @@
   * { box-sizing: border-box; }
   body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: radial-gradient(circle at top right, rgba(251, 63, 58, 0.12), transparent 22%), linear-gradient(180deg, #f6f9fc 0%, #eef3f8 100%); color: var(--text); display: flex; min-height: 100vh; }
   body.sidebar-open { overflow: hidden; }
-  #sidebar { width: 220px; background-color: var(--primary); color: white; height: 100vh; position: fixed; top: 0; left: 0; padding: 20px; box-sizing: border-box; z-index: 30; transition: transform 0.28s ease; }
-  #sidebar h2 { text-align: center; margin-bottom: 20px; }
+  #sidebar { width: 240px; background: linear-gradient(180deg, #073954 0%, #0b2e47 100%); color: white; height: 100vh; position: fixed; top: 0; left: 0; padding: 24px 18px; box-sizing: border-box; overflow-y: auto; box-shadow: inset -1px 0 0 rgba(255,255,255,0.08); z-index: 30; transition: transform 0.28s ease; }
+  .sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 6px 8px 18px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+  .sidebar-brand img { width: 62px; height: auto; object-fit: contain; }
+  .sidebar-brand-text strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+  .sidebar-brand-text span { display: block; font-size: 0.82rem; line-height: 1.35; color: rgba(255,255,255,0.74); }
+  #sidebar h2 { text-align: left; margin-bottom: 14px; padding: 0 8px; font-size: 1rem; }
   #sidebar ul { list-style: none; padding: 0; margin: 0; }
-  #sidebar ul li { margin: 15px 0; }
-  #sidebar ul li a, #sidebar ul li span { color: white; text-decoration: none; display: block; padding: 8px 12px; border-radius: 6px; font-weight: bold; transition: background 0.2s; }
-  #sidebar ul li a:hover, #sidebar ul li a.active { background-color: var(--secondary); }
+  #sidebar ul li { margin: 10px 0; }
+  #sidebar ul li a, #sidebar ul li span { color: white; text-decoration: none; display: block; padding: 10px 12px; border-radius: 12px; font-weight: bold; transition: background 0.2s, transform 0.2s; }
+  #sidebar ul li a:hover, #sidebar ul li a.active { background: rgba(251,63,58,0.95); transform: translateX(2px); }
   #sidebar .menu-label span { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.86); font-size: 0.82rem; letter-spacing: 0.04em; text-transform: uppercase; }
-  #mainContent { margin-left: 220px; width: calc(100% - 220px); padding: 24px; }
+  #mainContent { margin-left: 240px; width: calc(100% - 240px); padding: 24px; }
   .mobile-topbar { display: none; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
   .mobile-topbar strong { color: var(--primary); font-size: 1rem; }
   .menu-toggle { border: 0; border-radius: 14px; background: var(--primary); color: white; padding: 12px 16px; font-weight: 700; cursor: pointer; box-shadow: 0 12px 24px rgba(7, 57, 84, 0.16); }
@@ -124,6 +128,13 @@ verificarLogin();
 <body>
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
   <aside id="sidebar">
+    <div class="sidebar-brand">
+      <img src="logo.png" alt="Logo DC">
+      <div class="sidebar-brand-text">
+        <strong>Portal DC</strong>
+        <span>Controles internos e dashboards corporativos.</span>
+      </div>
+    </div>
     <h2>Menu</h2>
     <ul>
       <li><a href="portal.html" class="active">Portal Inicial</a></li>
