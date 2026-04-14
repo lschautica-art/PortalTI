@@ -59,6 +59,18 @@ NEWS_CONFIG = {
             "sortby": "publishedAt",
         },
     },
+    "home": {
+        "path": "/api/news/home",
+        "alt_path": "/.netlify/functions/news-home",
+        "endpoint": "/search",
+        "params": {
+            "q": 'varejo OR supermercados OR mercado OR "mercado financeiro" OR dolar OR cambio OR inflacao',
+            "lang": "pt",
+            "country": "br",
+            "max": "6",
+            "sortby": "publishedAt",
+        },
+    },
 }
 
 
@@ -204,6 +216,8 @@ class PortalHandler(SimpleHTTPRequestHandler):
             NEWS_CONFIG["ti"]["alt_path"]: "ti",
             NEWS_CONFIG["rh"]["path"]: "rh",
             NEWS_CONFIG["rh"]["alt_path"]: "rh",
+            NEWS_CONFIG["home"]["path"]: "home",
+            NEWS_CONFIG["home"]["alt_path"]: "home",
         }
 
         if route in valid_paths:
