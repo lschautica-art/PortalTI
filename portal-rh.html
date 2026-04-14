@@ -264,8 +264,9 @@ window.portalAuth.exigirAutenticacao();
       status.textContent = aviso || 'Noticias de RH atualizadas com sucesso.';
       lista.innerHTML = artigos.map(montarCardNoticia).join('');
     } catch (erro) {
-      status.textContent = 'Nao foi possivel carregar as noticias agora. Tente novamente em alguns minutos.';
-      lista.innerHTML = '<div class="news-empty">A consulta falhou. Verifique se a Edge Function do Supabase esta publicada e se o secret GNEWS_API_KEY esta configurado corretamente.</div>';
+      const detalhe = erro instanceof Error ? erro.message : 'Falha desconhecida ao consultar as noticias.';
+      status.textContent = 'Nao foi possivel carregar as noticias agora.';
+      lista.innerHTML = `<div class="news-empty">A consulta falhou: ${detalhe}</div>`;
       console.error('Erro ao carregar noticias de RH:', erro);
     }
   }
