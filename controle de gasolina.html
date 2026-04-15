@@ -1448,14 +1448,7 @@ window.portalAuth.exigirAutenticacao();
   mesInicio.addEventListener('change', aplicarFiltros);
   mesFim.addEventListener('change', aplicarFiltros);
 
-  async function iniciarPagina() {
-    try {
-      const sessao = await window.portalAuth?.obterSessaoAtual?.();
-      if (!sessao) return;
-    } catch (error) {
-      atualizarStatusSalvamento('Nao foi possivel validar a sessao antes de carregar os CSVs.', 'error');
-      return;
-    }
+  function iniciarPagina() {
     inicializarMapa();
     carregarArquivoPadrao();
   }
