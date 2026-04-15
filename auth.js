@@ -1,5 +1,5 @@
-const PORTAL_SUPABASE_URL = "https://nfbcjunuanwjsciajifg.supabase.co";
-const PORTAL_SUPABASE_ANON_KEY = "sb_publishable_fFiZCvpwkFgcOLob6SVQ7Q_6yJqiDqz";
+const PORTAL_SUPABASE_URL = "https://thtyijlvgfrrzoydlmzl.supabase.co";
+const PORTAL_SUPABASE_ANON_KEY = "sb_publishable_TDJn8DVaE7QSZgEl9gAVlg_wfyyZ2SJ";
 const PORTAL_LOGIN_EMAIL_DOMAINS = ["distribuidoradc.com.br", "empresa.local"];
 const PORTAL_LOCAL_SESSION_KEY = "portalti.localSession";
 
@@ -88,7 +88,7 @@ function limparSessaoLocal() {
 
 function podeUsarFallbackLocal(email) {
   const emailNormalizado = normalizarLogin(email);
-  return emailNormalizado.endsWith("@distribuidoradc.com.br");
+  return obterDominiosLogin().some((domain) => emailNormalizado.endsWith(`@${domain}`));
 }
 
 function resolverEndpointNoticias(secao) {
