@@ -1,6 +1,7 @@
 const PORTAL_SUPABASE_URL = "https://nfbcjunuanwjsciajifg.supabase.co";
 const PORTAL_SUPABASE_ANON_KEY = "sb_publishable_fFiZCvpwkFgcOLob6SVQ7Q_6yJqiDqz";
 const PORTAL_LOGIN_EMAIL_DOMAINS = ["distribuidoradc.com.br", "empresa.local"];
+const PORTAL_LOCAL_SESSION_KEY = "portalti.localSession";
 
 const portalSupabase = window.supabase.createClient(
   PORTAL_SUPABASE_URL,
@@ -52,6 +53,44 @@ function isErroConectividade(error) {
   );
 }
 
+function obterSessaoLocal() {
+  try {
+    const bruto = window.sessionStorage.getItem(PORTAL_LOCAL_SESSION_KEY);
+    if (!bruto) return null;
+    const sessao = JSON.parse(bruto);
+    if (!sessao?.user?.email) return null;
+    return sessao;
+  } catch (error) {
+    console.warn("Falha ao ler sessao local:", error);
+    return null;
+  }
+}
+
+function salvarSessaoLocal(email) {
+  const sessao = {
+    access_token: "local-session",
+    token_type: "bearer",
+    expires_at: Date.now() + (8 * 60 * 60 * 1000),
+    user: {
+      id: `local:${email}`,
+      email,
+      aud: "authenticated",
+    },
+    local: true,
+  };
+  window.sessionStorage.setItem(PORTAL_LOCAL_SESSION_KEY, JSON.stringify(sessao));
+  return sessao;
+}
+
+function limparSessaoLocal() {
+  window.sessionStorage.removeItem(PORTAL_LOCAL_SESSION_KEY);
+}
+
+function podeUsarFallbackLocal(email) {
+  const emailNormalizado = normalizarLogin(email);
+  return emailNormalizado.endsWith("@distribuidoradc.com.br");
+}
+
 function resolverEndpointNoticias(secao) {
   const secaoNormalizada = String(secao || "").trim().toLowerCase();
   const sections = new Set(["home", "ti", "rh", "comercial"]);
@@ -92,8 +131,13 @@ function resolverEndpointNoticias(secao) {
 
 async function obterSessaoAtual() {
   const { data, error } = await portalSupabase.auth.getSession();
-  if (error) throw error;
-  return data.session;
+  if (error) {
+    if (isErroConectividade(error)) {
+      return obterSessaoLocal();
+    }
+    throw error;
+  }
+  return data.session || obterSessaoLocal();
 }
 
 async function loginPortal(login, senha) {
@@ -111,10 +155,19 @@ async function loginPortal(login, senha) {
     });
 
     if (!error) {
+      limparSessaoLocal();
       return { ...data, emailUtilizado: email };
     }
 
     if (isErroConectividade(error)) {
+      if (podeUsarFallbackLocal(email)) {
+        return {
+          session: salvarSessaoLocal(email),
+          user: { email },
+          emailUtilizado: email,
+          localFallback: true,
+        };
+      }
       throw new Error("Falha ao conectar ao servico de autenticacao. Verifique a URL do Supabase e a ligacao com a internet.");
     }
 
@@ -145,7 +198,10 @@ async function exigirAutenticacao() {
 async function sairPortal() {
   try {
     await portalSupabase.auth.signOut();
+  } catch (error) {
+    console.warn("Falha ao terminar sessao remota:", error);
   } finally {
+    limparSessaoLocal();
     window.location.href = "index.html";
   }
 }

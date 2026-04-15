@@ -403,7 +403,11 @@
     try {
       const resultado = await window.portalAuth.loginPortal(usuario, senha);
       const nomeExibicao = resultado?.user?.email || usuario;
-      mostrarSucesso(`Bem-vindo, ${nomeExibicao}!`);
+      if (resultado?.localFallback) {
+        mostrarSucesso(`Entraste em modo local temporario como ${nomeExibicao}.`);
+      } else {
+        mostrarSucesso(`Bem-vindo, ${nomeExibicao}!`);
+      }
       setTimeout(() => {
         window.location.href = 'portal.html';
       }, 900);
