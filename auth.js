@@ -1,6 +1,6 @@
 const PORTAL_SUPABASE_URL = "https://nfbcjunuanwjsciajifg.supabase.co";
 const PORTAL_SUPABASE_ANON_KEY = "sb_publishable_fFiZCvpwkFgcOLob6SVQ7Q_6yJqiDqz";
-const PORTAL_LOGIN_EMAIL_DOMAIN = "empresa.local";
+const PORTAL_LOGIN_EMAIL_DOMAINS = ["distribuidoradc.com.br", "empresa.local"];
 
 const portalSupabase = window.supabase.createClient(
   PORTAL_SUPABASE_URL,
@@ -11,12 +11,45 @@ function normalizarLogin(valor) {
   return String(valor || "").trim().toLowerCase();
 }
 
-function resolverEmailLogin(login) {
+function obterDominiosLogin() {
+  const customDomains = window.PORTAL_AUTH_CONFIG?.loginEmailDomains;
+  const domains = Array.isArray(customDomains) && customDomains.length
+    ? customDomains
+    : PORTAL_LOGIN_EMAIL_DOMAINS;
+
+  return [...new Set(
+    domains
+      .map((domain) => String(domain || "").trim().toLowerCase())
+      .filter(Boolean),
+  )];
+}
+
+function resolverEmailsLogin(login) {
   const loginNormalizado = normalizarLogin(login);
-  if (!loginNormalizado) return "";
-  return loginNormalizado.includes("@")
-    ? loginNormalizado
-    : `${loginNormalizado}@${PORTAL_LOGIN_EMAIL_DOMAIN}`;
+  if (!loginNormalizado) return [];
+  if (loginNormalizado.includes("@")) {
+    return [loginNormalizado];
+  }
+
+  return obterDominiosLogin().map((domain) => `${loginNormalizado}@${domain}`);
+}
+
+function isErroCredenciaisInvalidas(error) {
+  const mensagem = String(error?.message || "").toLowerCase();
+  const status = Number(error?.status || 0);
+  return status === 400 || mensagem.includes("invalid login credentials");
+}
+
+function isErroConectividade(error) {
+  const mensagem = String(error?.message || "").toLowerCase();
+  const nome = String(error?.name || "").toLowerCase();
+  return (
+    mensagem.includes("failed to fetch")
+    || mensagem.includes("network")
+    || mensagem.includes("fetch")
+    || nome.includes("fetch")
+    || nome.includes("network")
+  );
 }
 
 function resolverEndpointNoticias(secao) {
@@ -64,15 +97,34 @@ async function obterSessaoAtual() {
 }
 
 async function loginPortal(login, senha) {
-  const email = resolverEmailLogin(login);
+  const emails = resolverEmailsLogin(login);
+  if (!emails.length) {
+    throw new Error("Informe um usuario ou e-mail valido.");
+  }
 
-  const { data, error } = await portalSupabase.auth.signInWithPassword({
-    email,
-    password: String(senha || ""),
-  });
+  let ultimoErro = null;
 
-  if (error) throw error;
-  return data;
+  for (const email of emails) {
+    const { data, error } = await portalSupabase.auth.signInWithPassword({
+      email,
+      password: String(senha || ""),
+    });
+
+    if (!error) {
+      return { ...data, emailUtilizado: email };
+    }
+
+    if (isErroConectividade(error)) {
+      throw new Error("Falha ao conectar ao servico de autenticacao. Verifique a URL do Supabase e a ligacao com a internet.");
+    }
+
+    ultimoErro = error;
+    if (!isErroCredenciaisInvalidas(error)) {
+      throw error;
+    }
+  }
+
+  throw ultimoErro || new Error("Nao foi possivel autenticar o utilizador.");
 }
 
 async function exigirAutenticacao() {
@@ -110,7 +162,7 @@ function ativarLinksLogout() {
 window.portalAuth = {
   supabase: portalSupabase,
   normalizarLogin,
-  resolverEmailLogin,
+  resolverEmailsLogin,
   resolverEndpointNoticias,
   obterSessaoAtual,
   loginPortal,

@@ -342,6 +342,19 @@
   const inputUsuario = document.getElementById('usuario');
   const inputSenha = document.getElementById('senha');
 
+  function obterMensagemErroLogin(erro, usuarioInformado){
+    const mensagem = String(erro?.message || '');
+    if (mensagem.includes('Falha ao conectar ao servico de autenticacao')) {
+      return 'Falha de ligacao com o Supabase. Confirma a URL/chave do projeto e a tua internet.';
+    }
+
+    if (!String(usuarioInformado || '').includes('@')) {
+      return 'Nao foi possivel entrar. Se estiveres a usar o utilizador, tenta tambem com o e-mail completo.';
+    }
+
+    return 'Usuario, e-mail ou senha incorretos.';
+  }
+
   function mostrarErro(msg){
     errorMsg.textContent = msg;
     errorMsg.style.display = 'block';
@@ -388,13 +401,14 @@
     btnLogin.disabled = true;
 
     try {
-      await window.portalAuth.loginPortal(usuario, senha);
-      mostrarSucesso(`Bem-vindo, ${usuario}!`);
+      const resultado = await window.portalAuth.loginPortal(usuario, senha);
+      const nomeExibicao = resultado?.user?.email || usuario;
+      mostrarSucesso(`Bem-vindo, ${nomeExibicao}!`);
       setTimeout(() => {
         window.location.href = 'portal.html';
       }, 900);
     } catch (erro) {
-      mostrarErro("Usuario, e-mail ou senha incorretos.");
+      mostrarErro(obterMensagemErroLogin(erro, usuario));
       btnLogin.textContent = "Entrar";
       btnLogin.disabled = false;
       inputUsuario.classList.add('error');
