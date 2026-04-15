@@ -498,9 +498,23 @@ window.portalAuth.exigirAutenticacao();
   function converterData(valorOriginal) {
     const texto = String(valorOriginal || '').trim();
     if (!texto) return null;
+    if (/^\d{5}(\.\d+)?$/.test(texto)) {
+      const serial = Number(texto);
+      if (Number.isFinite(serial)) {
+        const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+        const data = new Date(excelEpoch.getTime() + Math.round(serial * 86400000));
+        if (!Number.isNaN(data.getTime())) {
+          return `${data.getUTCFullYear()}-${String(data.getUTCMonth() + 1).padStart(2, '0')}`;
+        }
+      }
+    }
     if (/^\d{4}-\d{2}-\d{2}$/.test(texto) || /^\d{4}-\d{2}$/.test(texto)) return texto.slice(0, 7);
+    const anoMes = texto.match(/^(\d{2})\/(\d{4})$/);
+    if (anoMes) return `${anoMes[2]}-${anoMes[1]}`;
     const br = texto.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
     if (br) return `${br[3]}-${br[2]}`;
+    const isoAlternativo = texto.match(/^(\d{4})[\/-](\d{2})[\/-](\d{2})/);
+    if (isoAlternativo) return `${isoAlternativo[1]}-${isoAlternativo[2]}`;
     const data = new Date(texto);
     if (!Number.isNaN(data.getTime())) return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
     return null;
@@ -642,28 +656,37 @@ window.portalAuth.exigirAutenticacao();
       return { dados: [], usaRelatorioBruto, valido: false };
     }
 
-    const dados = data.map((linha) => ({
-      supervisor: String(linha[colSupervisor] || 'Sem agrupamento').trim(),
-      placa: String(linha[colPlaca] || '').trim(),
-      veiculo: String(linha[colVeiculo] || 'Veiculo nao informado').trim(),
-      mes: converterData(linha[colData]),
-      combustivel: String(linha[colCombustivel] || 'Nao informado').trim(),
-      valor: converterValor(linha[colValor]),
-      litros: converterValor(linha[colLitros]),
-      valorLitro: converterValor(linha[colValorLitro]),
-      posto: normalizarPosto(linha[colPosto]),
-      cidade: normalizarLocalidade(linha[colCidade]),
-      uf: String(linha[localizarColuna(colunas, ['UF EC', 'UF'])] || '').trim().toUpperCase(),
-      endereco: String(linha[localizarColuna(colunas, ['Logradouro EC', 'Endereco', 'Logradouro'])] || '').trim(),
-      capacidadeTanque: converterValor(linha[colCapacidade]),
-      hodometroAnterior: converterValor(linha[colHodAnterior]),
-      hodometroAtual: converterValor(linha[colHodAtual]),
-      kmPercorrido: converterValor(linha[colKmPercorrido]),
-      custoKmInformado: converterValor(linha[colCustoKm]),
-      mediaEfetiva: converterValor(linha[colMediaEfetiva]),
-      origemResponsavel: String(linha[colSupervisor] || '').trim() ? 'principal' : 'sem_nome',
-      unidade: String(linha[colBase] || unidadePadrao || '').trim() || unidadePadrao || 'Nao identificada'
-    })).filter((item) => item.placa && item.veiculo && item.mes && item.combustivel && item.valor >= 0);
+    const dados = data.map((linha) => {
+      const placaOriginal = String(linha[colPlaca] || '').trim().toUpperCase();
+      const placa = placaOriginal || 'SEM PLACA';
+      const veiculo = String(linha[colVeiculo] || '').trim() || 'Veiculo nao informado';
+      const combustivel = String(linha[colCombustivel] || '').trim() || 'Nao informado';
+      const mes = converterData(linha[colData]);
+      const valor = converterValor(linha[colValor]);
+
+      return {
+        supervisor: String(linha[colSupervisor] || 'Sem agrupamento').trim(),
+        placa,
+        veiculo,
+        mes,
+        combustivel,
+        valor,
+        litros: converterValor(linha[colLitros]),
+        valorLitro: converterValor(linha[colValorLitro]),
+        posto: normalizarPosto(linha[colPosto]),
+        cidade: normalizarLocalidade(linha[colCidade]),
+        uf: String(linha[localizarColuna(colunas, ['UF EC', 'UF'])] || '').trim().toUpperCase(),
+        endereco: String(linha[localizarColuna(colunas, ['Logradouro EC', 'Endereco', 'Logradouro'])] || '').trim(),
+        capacidadeTanque: converterValor(linha[colCapacidade]),
+        hodometroAnterior: converterValor(linha[colHodAnterior]),
+        hodometroAtual: converterValor(linha[colHodAtual]),
+        kmPercorrido: converterValor(linha[colKmPercorrido]),
+        custoKmInformado: converterValor(linha[colCustoKm]),
+        mediaEfetiva: converterValor(linha[colMediaEfetiva]),
+        origemResponsavel: String(linha[colSupervisor] || '').trim() ? 'principal' : 'sem_nome',
+        unidade: String(linha[colBase] || unidadePadrao || '').trim() || unidadePadrao || 'Nao identificada'
+      };
+    }).filter((item) => item.mes && Number.isFinite(item.valor) && (item.placa || item.veiculo));
 
     return { dados, usaRelatorioBruto, valido: true };
   }
