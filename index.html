@@ -81,86 +81,9 @@
   .page-shell {
     position: relative;
     z-index: 1;
-    width: min(1240px, calc(100% - 48px));
-    display: grid;
-    grid-template-columns: minmax(0, 1.45fr) minmax(340px, 390px);
-    gap: 24px;
-    align-items: center;
-  }
-  .showcase-panel {
-    position: relative;
-    overflow: hidden;
-    border-radius: 30px;
-    padding: 28px 30px;
-    background:
-      linear-gradient(150deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04)),
-      linear-gradient(135deg, rgba(3,25,38,0.92), rgba(7,57,84,0.88));
-    border: 1px solid rgba(255,255,255,0.16);
-    box-shadow: 0 26px 70px rgba(3,25,38,0.32);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    min-height: 520px;
-  }
-  .showcase-panel::before {
-    content:"";
-    position:absolute;
-    inset:0;
-    background:
-      radial-gradient(circle at 15% 20%, rgba(255,255,255,0.16), transparent 22%),
-      radial-gradient(circle at 82% 14%, rgba(251,63,58,0.26), transparent 18%),
-      linear-gradient(120deg, transparent 0 32%, rgba(255,255,255,0.05) 32% 35%, transparent 35% 100%);
-    pointer-events:none;
-  }
-  .brand-ribbon {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-  }
-  .brand-ribbon {
-    display: grid;
-    gap: 16px;
-  }
-  .brand-ribbon-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 6px;
-  }
-  .brand-ribbon-header strong {
-    font-size: 1.08rem;
-  }
-  .brand-ribbon-header span {
-    color: rgba(255,255,255,0.72);
-    font-size: 0.9rem;
-  }
-  .brand-track {
-    overflow: hidden;
-    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
-  }
-  .brand-row {
-    display: flex;
-    width: max-content;
-    gap: 16px;
-    animation: marquee 26s linear infinite;
-  }
-  .brand-row.reverse { animation-direction: reverse; animation-duration: 30s; }
-  .brand-chip {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 156px;
-    height: 88px;
-    padding: 14px 22px;
-    border-radius: 22px;
-    background: rgba(255,255,255,0.96);
-    box-shadow: 0 10px 24px rgba(3,25,38,0.18);
-  }
-  .brand-chip img {
-    max-width: 100%;
-    max-height: 42px;
-    object-fit: contain;
+    width: min(420px, calc(100% - 24px));
+    display: block;
+    margin: 0 auto;
   }
   .login-container {
     position:relative;
@@ -205,10 +128,6 @@
     50% { transform:translate3d(16px,-28px,0) scale(1.05); opacity:0.38; }
     100% { transform:translate3d(-10px,-56px,0) scale(0.96); opacity:0.12; }
   }
-  @keyframes marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
   @keyframes fadeIn { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
   .login-container h2 { margin-bottom:25px; font-weight:700; font-size:2rem; }
   .input-group { margin-bottom:20px; position:relative; text-align:left; }
@@ -230,12 +149,7 @@
       align-items: flex-start;
     }
     .page-shell {
-      grid-template-columns: 1fr;
-      width: min(720px, calc(100% - 28px));
-    }
-    .showcase-panel {
-      min-height: auto;
-      padding: 26px 22px;
+      width: min(420px, calc(100% - 20px));
     }
     .login-container {
       width: 100%;
@@ -247,19 +161,6 @@
     .background-grid { opacity:0.22; background-size:36px 36px; }
     .page-shell {
       width: min(100%, calc(100% - 20px));
-      gap: 18px;
-    }
-    .showcase-panel {
-      padding: 22px 18px;
-      border-radius: 24px;
-    }
-    .brand-chip {
-      min-width: 126px;
-      height: 72px;
-      padding: 10px 16px;
-    }
-    .brand-chip img {
-      max-height: 34px;
     }
     .login-head {
       margin-bottom: 20px;
@@ -282,41 +183,6 @@
     <span></span>
   </div>
   <div class="page-shell">
-    <section class="showcase-panel" aria-label="Apresentacao institucional DC">
-      <div class="brand-ribbon" aria-label="Marcas em destaque">
-        <div class="brand-ribbon-header">
-        </div>
-        <div class="brand-track">
-          <div class="brand-row">
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/79-condor.png" alt="Condor" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/49-baby-soft.png" alt="Baby Soft" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/26-repelex.png" alt="Repelex" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/62-docile.png" alt="Docile" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/60-elgin.png" alt="Elgin" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/79-condor.png" alt="Condor" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/49-baby-soft.png" alt="Baby Soft" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/26-repelex.png" alt="Repelex" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/62-docile.png" alt="Docile" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/60-elgin.png" alt="Elgin" /></div>
-          </div>
-        </div>
-        <div class="brand-track">
-          <div class="brand-row reverse">
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/10-guabi-natural.png" alt="Guabi Natural" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/32-gran-plus.png" alt="Gran Plus" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/43-primogato.png" alt="PrimoGato" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/46-three-dogs.png" alt="Three Dogs" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/47-atila.png" alt="Atila" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/10-guabi-natural.png" alt="Guabi Natural" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/32-gran-plus.png" alt="Gran Plus" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/43-primogato.png" alt="PrimoGato" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/46-three-dogs.png" alt="Three Dogs" /></div>
-            <div class="brand-chip"><img src="https://www.distribuidoradc.com.br/img/marcas/47-atila.png" alt="Atila" /></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <div class="login-container">
       <div class="msg error-msg" id="errorMsg"></div>
       <div class="msg success-msg" id="successMsg"></div>

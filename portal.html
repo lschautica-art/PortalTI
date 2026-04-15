@@ -66,14 +66,13 @@ window.portalAuth.exigirAutenticacao();
   .section-header h2 { margin: 0; color: var(--primary); font-size: 1.65rem; }
   .section-header p { margin: 0; color: var(--muted); max-width: 760px; line-height: 1.6; }
   .areas-grid, .highlights { display: grid; gap: 22px; }
-  .areas-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .areas-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .highlights { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
   .area-card, .highlight { background: var(--surface); border: 1px solid var(--border); border-radius: 26px; overflow: hidden; box-shadow: var(--shadow); }
   .area-visual { min-height: 270px; display: flex; align-items: end; padding: 28px; color: white; background-size: cover; background-position: center; position: relative; }
   .area-visual::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,57,84,0.1), rgba(7,57,84,0.8)); }
   .area-visual.ti { background-image: linear-gradient(135deg, rgba(7,57,84,0.64), rgba(12,91,128,0.48)), url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80'); }
   .area-visual.rh { background-image: linear-gradient(135deg, rgba(126,29,45,0.6), rgba(183,53,64,0.42)), url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80'); }
-  .area-visual.comercial { background-image: linear-gradient(135deg, rgba(29,106,79,0.64), rgba(47,163,110,0.48)), url('https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1200&q=80'); }
   .area-banner { position: relative; z-index: 1; max-width: 430px; }
   .area-banner small { display: inline-block; margin-bottom: 10px; font-size: 0.88rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.78); }
   .area-banner h3 { margin: 0 0 10px; font-size: 1.8rem; }
@@ -136,8 +135,6 @@ window.portalAuth.exigirAutenticacao();
       <li class="menu-label"><span>Area RH</span></li>
       <li><a href="portal-rh.html">RH</a></li>
       <li><a href="controle de gasolina.html">Controle de gasolina</a></li>
-      <li class="menu-label"><span>Area Comercial</span></li>
-      <li><a href="portal-comercial.html">Comercial</a></li>
       <li><a href="index.html" data-logout-link>Sair</a></li>
     </ul>
   </aside>
@@ -161,19 +158,18 @@ window.portalAuth.exigirAutenticacao();
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-copy">
-          <h1>Uma entrada unica para os controles estrategicos de T.I, RH e Comercial</h1>
+          <h1>Uma entrada unica para os controles estrategicos de T.I e RH</h1>
           <p>Centralize os acessos da empresa em uma pagina mais elegante, com identidade visual profissional, navegacao clara e espaco preparado para expandir novos paineis ao longo do tempo.</p>
           <div class="hero-actions">
             <a class="btn-primary" href="portal-ti.html">Explorar TI</a>
             <a class="btn-secondary" href="portal-rh.html">Explorar RH</a>
-            <a class="btn-secondary" href="portal-comercial.html">Explorar Comercial</a>
           </div>
         </div>
         <div class="hero-panel">
           <h3>Visao executiva</h3>
           <div class="hero-stats">
-            <div class="hero-stat"><strong>3</strong><span>Frentes principais organizadas no portal.</span></div>
-            <div class="hero-stat"><strong>T.I + RH + Comercial</strong><span>Acessos separados por area para facilitar a leitura.</span></div>
+            <div class="hero-stat"><strong>2</strong><span>Frentes principais organizadas no portal.</span></div>
+            <div class="hero-stat"><strong>T.I + RH</strong><span>Acessos separados por area para facilitar a leitura.</span></div>
             <div class="hero-stat"><strong>Padrao</strong><span>Visual corporativo pronto para crescer com novos modulos.</span></div>
           </div>
         </div>
@@ -246,25 +242,6 @@ window.portalAuth.exigirAutenticacao();
             </div>
           </div>
         </article>
-        <article class="area-card">
-          <div class="area-visual comercial">
-            <div class="area-banner">
-              <small>Comercial</small>
-              <h3>Base pronta para metas, vendas e carteira de clientes</h3>
-              <p>Uma nova area institucional para reunir os futuros paineis comerciais, organizar indicadores de receita e dar visibilidade para a operacao de vendas.</p>
-            </div>
-          </div>
-          <div class="area-content">
-            <div class="metrics">
-              <div class="metric"><strong>0</strong><span>Modulos ativos</span></div>
-              <div class="metric"><strong>Receita</strong><span>Foco gerencial</span></div>
-              <div class="metric"><strong>Pronta</strong><span>Estrutura para expansao</span></div>
-            </div>
-            <div class="module-list">
-              <a class="module-link" href="portal-comercial.html"><div><strong>Entrar na area comercial</strong><span>Acessar a pagina institucional para centralizar os futuros paineis de vendas.</span></div><div class="module-arrow">&#8250;</div></a>
-            </div>
-          </div>
-        </article>
       </div>
     </section>
 
@@ -277,7 +254,7 @@ window.portalAuth.exigirAutenticacao();
       </div>
       <div class="highlights">
         <article class="highlight"><strong>Entrada centralizada</strong><p>Todos os modulos passam a ter um ponto unico de acesso, reforcando a organizacao do sistema.</p></article>
-        <article class="highlight"><strong>Separacao por area</strong><p>TI, RH e Comercial ficam estruturados de forma mais clara, facilitando o crescimento do portal.</p></article>
+        <article class="highlight"><strong>Separacao por area</strong><p>TI e RH ficam estruturados de forma mais clara, facilitando o crescimento do portal.</p></article>
         <article class="highlight"><strong>Visual institucional</strong><p>Layout mais proximo do estilo corporativo, com imagens, contrastes fortes e blocos elegantes.</p></article>
         <article class="highlight"><strong>Base para expansao</strong><p>Novos controles podem ser adicionados sem precisar redesenhar toda a navegacao.</p></article>
       </div>
