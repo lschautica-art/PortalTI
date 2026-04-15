@@ -170,9 +170,7 @@ window.portalAuth.exigirAutenticacao();
       <li class="menu-label"><span>Area RH</span></li>
       <li><a href="portal-rh.html">RH</a></li>
       <li><a href="controle de gasolina.html" class="active">Controle de combustivel</a></li>
-      <li class="menu-label"><span>Area Comercial</span></li>
-      <li><a href="portal-comercial.html">Comercial</a></li>
-      <li><a href="index.html">Sair</a></li>
+      <li><a href="index.html" data-logout-link>Sair</a></li>
     </ul>
   </aside>
 
@@ -1335,36 +1333,48 @@ window.portalAuth.exigirAutenticacao();
       });
   }
 
-  csvFileInput.addEventListener('change', (event) => {
+  csvFileInput.addEventListener('change', async (event) => {
     const arquivo = event.target.files[0];
     if (!arquivo) return;
-    atualizarStatus(`Enviando ${arquivo.name} para o Supabase...`);
+    atualizarStatus(`Lendo ${arquivo.name}...`);
     atualizarStatusSalvamento(`Enviando ${arquivo.name} para o Supabase como CSV atual da matriz...`);
-    Promise.all([arquivo.text(), uploadArquivoSupabase(STORAGE_PATH_MATRIZ, arquivo)])
-      .then(([texto]) => {
+
+    try {
+      const texto = await arquivo.text();
+      carregarTextoCSV(texto, `${arquivo.name} (arquivo local)`);
+
+      try {
+        await uploadArquivoSupabase(STORAGE_PATH_MATRIZ, arquivo);
         atualizarStatusSalvamento(`Upload concluido. ${arquivo.name} foi salvo no Supabase como CSV atual da matriz.`, 'success');
-        carregarTextoCSV(texto, `${arquivo.name} (enviado ao Supabase)`);
-      })
-      .catch((error) => {
-        atualizarStatus('Nao foi possivel importar o arquivo selecionado.', true);
-        atualizarStatusSalvamento(`Falha ao salvar ${arquivo.name} no Supabase. ${error.message || ''}`.trim(), 'error');
-      });
+      } catch (error) {
+        atualizarStatusSalvamento(`CSV carregado localmente, mas falhou ao salvar ${arquivo.name} no Supabase. ${error.message || ''}`.trim(), 'error');
+      }
+    } catch (error) {
+      atualizarStatus('Nao foi possivel importar o arquivo selecionado.', true);
+      atualizarStatusSalvamento(`Falha ao ler ${arquivo.name}. ${error.message || ''}`.trim(), 'error');
+    }
   });
 
-  cadastroFileInput.addEventListener('change', (event) => {
+  cadastroFileInput.addEventListener('change', async (event) => {
     const arquivo = event.target.files[0];
     if (!arquivo) return;
-    atualizarStatusCadastro(`Enviando ${arquivo.name} para o Supabase...`);
+    atualizarStatusCadastro(`Lendo ${arquivo.name}...`);
     atualizarStatusSalvamento(`Enviando ${arquivo.name} para o Supabase como CSV atual da filial...`);
-    Promise.all([arquivo.text(), uploadArquivoSupabase(STORAGE_PATH_FILIAL, arquivo)])
-      .then(([texto]) => {
+
+    try {
+      const texto = await arquivo.text();
+      carregarCadastroTexto(texto, `${arquivo.name} (arquivo local)`);
+
+      try {
+        await uploadArquivoSupabase(STORAGE_PATH_FILIAL, arquivo);
         atualizarStatusSalvamento(`Upload concluido. ${arquivo.name} foi salvo no Supabase como CSV atual da filial.`, 'success');
-        carregarCadastroTexto(texto, `${arquivo.name} (enviado ao Supabase)`);
-      })
-      .catch((error) => {
-        atualizarStatusCadastro('Nao foi possivel importar o CSV da filial.', true);
-        atualizarStatusSalvamento(`Falha ao salvar ${arquivo.name} no Supabase. ${error.message || ''}`.trim(), 'error');
-      });
+      } catch (error) {
+        atualizarStatusSalvamento(`CSV carregado localmente, mas falhou ao salvar ${arquivo.name} no Supabase. ${error.message || ''}`.trim(), 'error');
+      }
+    } catch (error) {
+      atualizarStatusCadastro('Nao foi possivel importar o CSV da filial.', true);
+      atualizarStatusSalvamento(`Falha ao ler ${arquivo.name}. ${error.message || ''}`.trim(), 'error');
+    }
   });
 
   document.getElementById('usarPadrao').addEventListener('click', carregarArquivoPadrao);
@@ -1407,6 +1417,7 @@ window.portalAuth.exigirAutenticacao();
     atualizarStatusSalvamento(`Exportacao concluida com ${filtrado.length} linhas filtradas.`, 'success');
   });
   document.getElementById('exportarRelatorio').addEventListener('click', exportarRelatorioGerencial);
+  window.portalAuth.ativarLinksLogout();
   unidadeFiltro.addEventListener('change', aplicarFiltros);
   supervisorFiltro.addEventListener('change', aplicarFiltros);
   placaFiltro.addEventListener('change', aplicarFiltros);
